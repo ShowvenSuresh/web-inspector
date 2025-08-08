@@ -1,0 +1,56 @@
+project-root/
+│
+├── extension/                  # Chrome Extension (Manifest V3)
+│   ├── manifest.json
+│   ├── background/
+│   │   ├── service_worker.js   # Monitors traffic, sends to backend
+│   │   ├── feature_extractor.js
+│   │   ├── message_handler.js  # Handles incoming results from backend
+│   │
+│   ├── popup/
+│   │   ├── popup.html
+│   │   ├── popup.js
+│   │   ├── popup.css
+│   │
+│   ├── settings/
+│   │   ├── settings.html
+│   │   ├── settings.js
+│   │   ├── settings.css
+│   │
+│   ├── assets/
+│   │   ├── icons/
+│   │   │   ├── icon16.png
+│   │   │   ├── icon48.png
+│   │   │   ├── icon128.png
+│   │
+│   └── utils/
+│       ├── helpers.js
+│
+├── backend/                     # Server / ML model API
+│   ├── app.py                    # Flask/FastAPI entry point
+│   ├── requirements.txt
+│   ├── ml_model/
+│   │   ├── model.pkl             # Trained ML model
+│   │   ├── model_loader.py
+│   │   ├── feature_processing.py # Same logic as extension’s extractor
+│   │
+│   ├── routes/
+│   │   ├── classify.py           # Endpoint to receive features, return prediction
+│
+├── data/                         # Datasets and preprocessing scripts
+│   ├── raw/
+│   │   ├── kaggle_dataset.csv
+│   ├── processed/
+│   │   ├── features.csv
+│   ├── preprocess.py
+│
+├── docs/                         # Project documentation
+│   ├── activity_diagram.png
+│   ├── system_design.md
+│   ├── API_spec.md
+│
+├── tests/                        # Unit and integration tests
+│   ├── test_extension.js
+│   ├── test_backend.py
+│
+└── README.md
