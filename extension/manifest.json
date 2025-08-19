@@ -12,5 +12,16 @@
   "action": {
     "default_popup": "./pages/popup.html"
   },
-  "permissions": []
+  "permissions": [
+    "storge",
+    "tabs",
+    "scripting",
+    "webRequest",
+    "webRequestBlocking",
+    "notifications",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }
