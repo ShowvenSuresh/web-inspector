@@ -3,11 +3,14 @@
   "name": "Web-Inspector",
   "version": "1.0.0",
   "description": "A chrome extension to inspect http traffic",
-  "action": {
-    "default_popup": "./pages/dashboard.html"
+  "side_panel": {
+    "default_path": "./pages/dashboard.html"
   },
   "background": {
     "service_worker": "./background/background.js"
+  },
+  "action": {
+    "default_popup": "./pages/popup.html"
   },
   "permissions": []
 }
