@@ -1,11 +1,9 @@
 .extension {
   width: 400px;
   height: 600px;
-  margin: 24px auto;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background: white;
+  padding: 0xp;
+  margin: 0px;
   overflow: hidden;
 }
 
