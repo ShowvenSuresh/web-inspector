@@ -49,7 +49,7 @@ chrome.webRequest.onBeforeRequest.addListener(
   (details)=> {
 //    console.log("Intercepted webRequest", details)
        const features = extractFeatures(details)
-    //todo--> send to back end for classification
+    //todo--> send to backend for classification using post method
     //generate the popup if the results is bad 
   },
   {urls: ["<all_urls>"]},
