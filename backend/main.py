@@ -43,4 +43,5 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.post("/predict")
 def predict(features:Features):
     #print(features)
-    return {"sent":"recived"}
+    return {"extrated features - main.py": features
+        ,"sent":"recived"}
