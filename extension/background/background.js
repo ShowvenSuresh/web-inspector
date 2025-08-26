@@ -67,8 +67,11 @@ async function sendToBackend(features){
 chrome.webRequest.onBeforeRequest.addListener(
    (details)=> {
     try{
+      if (details.url.startsWith("http://127.0.0.1:8000/predict")) {
+        return;
+      }
       const features = extractFeatures(details)
-       //sendToBackend(features)
+      sendToBackend(features)
     //todo--> send to backend for classification using post method
     //generate the popup if the results is bad
     }catch(error){
