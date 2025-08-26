@@ -10,13 +10,12 @@
     "default_popup": "./pages/dashboard.html"
   },
   "permissions": [
-    "storge",
+    "storage",
     "tabs",
     "scripting",
     "webRequest",
     "webRequestBlocking",
-    "notifications",
-    "sidePanel"
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"

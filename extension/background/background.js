@@ -45,15 +45,37 @@ function extractFeatures(details) {
   return features
 }
 
+async function sendToBackend(features){
+  try{
+    const response = await fetch('http://127.0.0.1:8000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(features)
+    });
+
+    const result = await response.json();
+    console.log('Classification result:', result);
+  
+  }catch(error){
+    console.log("fail to send to backend",error)
+  }
+
+}
+
 chrome.webRequest.onBeforeRequest.addListener(
-  (details)=> {
-//    console.log("Intercepted webRequest", details)
-       const features = extractFeatures(details)
+   (details)=> {
+    try{
+      const features = extractFeatures(details)
+       //sendToBackend(features)
     //todo--> send to backend for classification using post method
-    //generate the popup if the results is bad 
+    //generate the popup if the results is bad
+    }catch(error){
+      console.log("error interceptin request ")
+    }
   },
-  {urls: ["<all_urls>"]},
+  {urls: ["<all_urls>",]},
   ["requestBody"]
 
   );
-
