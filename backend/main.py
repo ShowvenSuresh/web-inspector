@@ -8,9 +8,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],             # or ["chrome-extension://<YOUR_ID>"]
+    allow_origins=["*"],             
     allow_methods=["*"],
-    allow_headers=["*"],             # <-- allows Content-Type
+    allow_headers=["*"],             
     allow_credentials=True,
 )
 
