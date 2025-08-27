@@ -57,11 +57,16 @@ async function sendToBackend(features){
 
     const result = await response.json();
     console.log('Classification result:', result);
+    return result
   
   }catch(error){
     console.log("fail to send to backend",error)
   }
 
+}
+
+function generateNotification(features ){
+  
 }
 
 chrome.webRequest.onBeforeRequest.addListener(
@@ -71,7 +76,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         return;
       }
       const features = extractFeatures(details)
-      sendToBackend(features)
+      const result = sendToBackend(features)
     //todo--> send to backend for classification using post method
     //generate the popup if the results is bad
     }catch(error){
