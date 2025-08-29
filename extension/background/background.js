@@ -11,6 +11,14 @@ function extractFeatures(details) {
   const urlObj = new URL(details.url)
   const method = details.method || ""
   const path = urlObj.pathname || ""
+  let isHttps= false 
+  
+
+  if (urlObj.protocol == "https:"){
+    isHttps = true
+  }
+
+  console.log("isHttps",isHttps)
 
   //console.log(urlObj)
 
@@ -72,9 +80,7 @@ function generateNotification(features ){
 }
 
 
-function checkHttps(){
 
-}
 
 chrome.webRequest.onBeforeRequest.addListener(
    (details)=> {
