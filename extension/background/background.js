@@ -69,6 +69,11 @@ function generateNotification(features ){
   
 }
 
+
+function checkHttps(){
+
+}
+
 chrome.webRequest.onBeforeRequest.addListener(
    (details)=> {
     try{
