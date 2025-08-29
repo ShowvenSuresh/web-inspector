@@ -12,6 +12,8 @@ function extractFeatures(details) {
   const method = details.method || ""
   const path = urlObj.pathname || ""
 
+  //console.log(urlObj)
+
 
   let body = ""
   if (details.requestBody && details.requestBody.raw) {
@@ -41,7 +43,7 @@ function extractFeatures(details) {
     badwords_count: badwords.reduce((count, w) => count + (body.toLowerCase().includes(w) ? 1 : 0), 0)
   }
 
-  console.log(" Extracted features:", features);
+  //console.log(" Extracted features:", features);
   return features
 }
 
