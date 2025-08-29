@@ -11,14 +11,14 @@ function extractFeatures(details) {
   const urlObj = new URL(details.url)
   const method = details.method || ""
   const path = urlObj.pathname || ""
-  let isHttps= false 
-  
+  let isHttps = false
 
-  if (urlObj.protocol == "https:"){
+
+  if (urlObj.protocol == "https:") {
     isHttps = true
   }
 
-  console.log("isHttps",isHttps)
+  console.log("isHttps", isHttps)
 
   //console.log(urlObj)
 
@@ -32,11 +32,11 @@ function extractFeatures(details) {
     }
   }
 
-  
+
   const features = {
     method: method,
     path: path,
-    body: body, 
+    body: body,
     single_q: (body.match(/'/g) || []).length,
     double_q: (body.match(/"/g) || []).length,
     dashes: (body.match(/--/g) || []).length,
@@ -55,8 +55,8 @@ function extractFeatures(details) {
   return features
 }
 
-async function sendToBackend(features){
-  try{
+async function sendToBackend(features) {
+  try {
     const response = await fetch('http://127.0.0.1:8000/predict', {
       method: 'POST',
       headers: {
@@ -68,35 +68,35 @@ async function sendToBackend(features){
     const result = await response.json();
     console.log('Classification result:', result);
     return result
-  
-  }catch(error){
-    console.log("fail to send to backend",error)
+
+  } catch (error) {
+    console.log("fail to send to backend", error)
   }
 
 }
 
-function generateNotification(features ){
-  
+function generateNotification(features) {
+
 }
 
 
 
 
 chrome.webRequest.onBeforeRequest.addListener(
-   (details)=> {
-    try{
+  (details) => {
+    try {
       if (details.url.startsWith("http://127.0.0.1:8000/predict")) {
         return;
       }
       const features = extractFeatures(details)
       const result = sendToBackend(features)
-    //todo--> send to backend for classification using post method
-    //generate the popup if the results is bad
-    }catch(error){
+      //todo--> send to backend for classification using post method
+      //generate the popup if the results is bad
+    } catch (error) {
       console.log("error interceptin request ")
     }
   },
-  {urls: ["<all_urls>",]},
+  { urls: ["<all_urls>",] },
   ["requestBody"]
 
-  );
+);
