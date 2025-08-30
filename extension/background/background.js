@@ -103,7 +103,8 @@ chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
     if (!monitoringEnabled) return
     try {
-      if (details.url.startsWith("http://127.0.0.1:8000/predict")) {
+      if (details.url.startsWith("http://127.0.0.1:8000/predict") || details.url.startsWith("chrome-extension://") || details.url.includes("/v1/traces") ||
+        details.url.includes("/analytics") || details.url.includes("/telemetry")) {
         return;
       }
       const features = extractFeatures(details)
