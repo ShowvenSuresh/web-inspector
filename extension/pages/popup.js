@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to update the status badge
   function updateStatusBadge(isEnabled) {
     if (isEnabled) {
-      statusBadge.textContent = "Active";
+      statusBadge.textContent = "Enabled";
       statusBadge.className = "badge active"; // Add active class for styling
     } else {
-      statusBadge.textContent = "Inactive";
+      statusBadge.textContent = "Disabled";
       statusBadge.className = "badge inactive"; // Add inactive class for styling
     }
   }
