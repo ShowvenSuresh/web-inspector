@@ -48,7 +48,6 @@
   font-size: 13px;
   border-radius: 999px;
   border: 1px solid #2b2b33;
-  background: #1a1a22;
   color: white;
 }
 
@@ -106,4 +105,93 @@
 .value:focus::before,
 .value:active::before {
   opacity: 1;
+}
+
+/* Card styling */
+.status-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-info strong {
+  display: block;
+  font-size: 16px;
+}
+
+.status-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked+.slider {
+  background-color: #4CAF50;
+  /* green when active */
+}
+
+input:checked+.slider:before {
+  transform: translateX(24px);
+}
+
+
+.badge.active {
+  background-color: #22c55e;
+  color: white;
+}
+
+/* Inactive state */
+.badge.inactive {
+  background-color: #ef4444;
+  color: white;
 }

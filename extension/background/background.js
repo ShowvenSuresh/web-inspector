@@ -7,6 +7,23 @@ const badwords = [
   'delete', 'xp_', 'or 1=1'
 ]
 
+let monitoringEnabled = true;
+
+// Initialize monitoring state from storage when service worker starts
+chrome.storage.local.get("monitorEnabled", (data) => {
+  monitoringEnabled = data.monitorEnabled ?? true; // default: enabled
+  console.log("Service worker initialized with monitoring:", monitoringEnabled ? "ENABLED" : "DISABLED");
+});
+
+// Listen for changes to the monitoring state
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && changes.monitorEnabled) {
+    monitoringEnabled = changes.monitorEnabled.newValue;
+    console.log("Service worker monitoring state changed to:", monitoringEnabled ? "ENABLED" : "DISABLED");
+  }
+});
+
+
 function extractFeatures(details) {
   const urlObj = new URL(details.url)
   const method = details.method || ""
@@ -18,7 +35,7 @@ function extractFeatures(details) {
     isHttps = true
   }
 
-  console.log("isHttps", isHttps)
+  //console.log("isHttps", isHttps)
 
   //console.log(urlObj)
 
@@ -84,6 +101,7 @@ function generateNotification(features) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
+    if (!monitoringEnabled) return
     try {
       if (details.url.startsWith("http://127.0.0.1:8000/predict")) {
         return;
@@ -100,3 +118,6 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["requestBody"]
 
 );
+
+
+

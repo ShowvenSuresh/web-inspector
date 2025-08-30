@@ -7,8 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web Traffic Inspector</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="script.js" defer></script>
 </head>
+
 
 <body>
   <div class="extension">
@@ -26,24 +26,49 @@
     <!--Navigation bar-->
     <div class="nav">
       <div class="input">
-        <button class="value" id="dashboard">
-          Dashboard
-        </button>
-        <button class="value" id="traffic">
-          Traffic
-        </button>
-        <button class="value" id="alerts">
-          alerts
-        </button>
-        <button class="value" id="history">
-          History
-        </button>
-
+        <button class="value" id="dashboardBtn">Dashboard</button>
+        <button class="value" id="trafficBtn">Traffic</button>
+        <button class="value" id="alertsBtn">Alerts</button>
+        <button class="value" id="historyBtn">History</button>
       </div>
     </div>
 
-  </div>
+    <!--dashboard-->
+    <div id="dashboardPage">
+      <div class="status-card">
+        <div class="status-info">
+          <span class="status-icon">〽️</span>
+          <div>
+            <strong>Monitoring Status</strong>
+            <p>Real-time Protection</p>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="monitorToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
 
+    <!-- traffic page-->
+    <div id="trafficPage">
+      <h1>This is the traffic page</h1>
+    </div>
+
+    <!--alerts-->
+    <div id="alertsPage">
+      <h1>This is the alerts page</h1>
+    </div>
+
+    <!--history-->
+    <div id="historyPage">
+      <h1>This is the history page</h1>
+    </div>
+
+  </div> <!-- ✅ closes .extension properly -->
+
+  <script defer src="popup.js"></script>
 </body>
+
 
 </html>
