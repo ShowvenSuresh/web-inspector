@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load saved state
   chrome.storage.local.get("monitorEnabled", (data) => {
     monitorToggle.checked = data.monitorEnabled ?? true; // default: enabled
-    monitorToggle.checked = isEnabled;
+    isEnabled = monitorToggle.checked
     updateStatusBadge(isEnabled); // Update badge on load
   });
 
