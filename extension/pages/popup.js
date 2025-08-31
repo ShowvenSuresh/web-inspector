@@ -1,3 +1,6 @@
+
+//navigation bar 
+
 document.addEventListener("DOMContentLoaded", () => {
   // Get all page divs
   const pages = {
@@ -27,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   pages.dashboardBtn.style.display = "block";
 });
 
-
+//turn seervice worker on and off
 document.addEventListener("DOMContentLoaded", () => {
   const monitorToggle = document.getElementById("monitorToggle");
   const statusBadge = document.getElementById("status-badge");
@@ -62,6 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+// live stats section
 document.addEventListener("DOMContentLoaded", () => {
 
 })
