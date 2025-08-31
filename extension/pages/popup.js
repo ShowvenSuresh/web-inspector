@@ -31,7 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const monitorToggle = document.getElementById("monitorToggle");
   const statusBadge = document.getElementById("status-badge");
-  let isEnabled = true
+  var isEnabled
+
+  // Load saved state
+  chrome.storage.local.get("monitorEnabled", (data) => {
+    monitorToggle.checked = data.monitorEnabled ?? true; // default: enabled
+    monitorToggle.checked = isEnabled;
+    updateStatusBadge(isEnabled); // Update badge on load
+  });
+
 
   // Function to update the status badge
   function updateStatusBadge(isEnabled) {
@@ -44,12 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Load saved state
-  chrome.storage.local.get("monitorEnabled", (data) => {
-    monitorToggle.checked = data.monitorEnabled ?? true; // default: enabled
-    monitorToggle.checked = isEnabled;
-    updateStatusBadge(isEnabled); // Update badge on load
-  });
 
   // Save state when toggled
   monitorToggle.addEventListener("change", () => {
