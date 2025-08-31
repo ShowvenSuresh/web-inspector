@@ -195,3 +195,76 @@ input:checked+.slider:before {
   background-color: #ef4444;
   color: white;
 }
+
+
+/* === Stats Grid === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.stat-label {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 3px;
+}
+
+.stat-value.blocked {
+  color: #d9534f;
+  /* red for blocked */
+}
+
+/* === Alerts Section === */
+.alerts-section {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.alerts-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.alert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.alert-item:last-child {
+  border-bottom: none;
+}
+
+.alert-msg {
+  margin-left: 5px;
+}
+
+.alert-time {
+  font-size: 12px;
+  color: #666;
+}

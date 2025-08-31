@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web Traffic Inspector</title>
   <link rel="stylesheet" href="styles.css" />
+  <script defer src="popup.js"></script>
 </head>
 
 
@@ -48,6 +49,33 @@
           <span class="slider round"></span>
         </label>
       </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          🌐 <span class="stat-label">Requests</span>
+          <span class="stat-value" id="requestsCount">0</span>
+        </div>
+        <div class="stat-card">
+          🛡️ <span class="stat-label">Blocked</span>
+          <span class="stat-value blocked" id="blockedCount">0</span>
+        </div>
+        <div class="stat-card">
+          ⚠️ <span class="stat-label">Alerts</span>
+          <span class="stat-value" id="alertsCount">0</span>
+        </div>
+        <div class="stat-card">
+          ⚡ <span class="stat-label">Avg Time</span>
+          <span class="stat-value" id="avgTime">0ms</span>
+        </div>
+      </div>
+
+      <!-- Recent Alerts -->
+      <div class="alerts-section" id="alertsSection">
+        <h3>Recent Alerts</h3>
+        <div id="alertsList">
+          <!-- JS will fill this -->
+        </div>
+      </div>
     </div>
 
     <!-- traffic page-->
@@ -67,7 +95,6 @@
 
   </div> <!-- ✅ closes .extension properly -->
 
-  <script defer src="popup.js"></script>
 </body>
 
 
