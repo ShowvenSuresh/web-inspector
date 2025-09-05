@@ -92,9 +92,11 @@ async function sendToBackend(features) {
 
 }
 
-function generateNotification(features) {
+function generatrafficNotification(features) {
 
 }
+
+function generateHttpNotification() { }
 
 
 
