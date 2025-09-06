@@ -71,3 +71,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
 })
 
+//dummy section for the traffic data
+const trafficData = [
+  {
+    status: "safe",
+    method: "GET",
+    time: "10:30:45",
+    url: "https://example.com/api/data",
+    length: 28,
+    entropy: 3.2,
+    headers: 8
+  },
+  {
+    status: "malicious",
+    method: "POST",
+    time: "10:31:12",
+    url: "https://malicious-site.com/payload",
+    length: 35,
+    entropy: 4.8,
+    headers: 12
+  },
+
+  {
+    status: "suspicious",
+    method: "GET",
+    time: "10:32:01",
+    url: "https://suspicious.net/track",
+    length: 29,
+    entropy: 4.1,
+    headers: 10
+  }
+];
+
+const trafficList = document.getElementById("traffic-list");
+
+trafficData.forEach(item => {
+  const div = document.createElement("div");
+  div.className = "traffic-item";
+
+  div.innerHTML = `
+    <div class="traffic-header">
+      <span class="status ${item.status}">${item.status}</span>
+      <span><span class="method">${item.method}</span> ${item.time}</span>
+    </div>
+    <div class="url">${item.url}</div>
+    <div class="meta">
+      
+    </div>
+  `;
+
+  trafficList.appendChild(div);
+});
+
