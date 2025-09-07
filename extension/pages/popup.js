@@ -123,3 +123,9 @@ trafficData.forEach(item => {
   trafficList.appendChild(div);
 });
 
+
+
+//dummy section for the alert tab 
+//dummy section for the history tab
+//dummy section for the is https nofification
+//dummy section for the web traffic alert notification
