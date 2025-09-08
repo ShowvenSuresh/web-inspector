@@ -96,7 +96,6 @@ function generatrafficNotification(features) {
 
 }
 
-function generateHttpNotification() { }
 
 
 
@@ -122,5 +121,19 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 );
 
+
+//checking weather the website is https
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  try {
+    if (changeInfo.status === "complete" && tab.url?.startsWith("http://")) {
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["/content/httpNotification.js"]
+      });
+    }
+  } catch (e) {
+    console.log("http detection error", e)
+  }
+});
 
 
