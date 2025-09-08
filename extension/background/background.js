@@ -96,10 +96,7 @@ function generatrafficNotification(features) {
 
 }
 
-
-
-
-
+//intercept the web request
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
     if (!monitoringEnabled) return
