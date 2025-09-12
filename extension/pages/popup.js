@@ -127,5 +127,43 @@ trafficData.forEach(item => {
 
 //dummy section for the alert tab 
 //dummy section for the history tab
-//dummy section for the is https nofification
+document.addEventListener("DOMContentLoaded", () => {
+  const historyList = document.getElementById("historyList");
+  const searchBox = document.getElementById("searchHistory");
+
+  // Load history entries
+  function loadHistory(query = "", limit = 10) {
+    historyList.innerHTML = "";
+    chrome.history.search(
+      {
+        text: query,
+        maxResults: limit, // default = 10
+        startTime: 0
+      },
+      (results) => {
+        if (!results || results.length === 0) {
+          historyList.innerHTML = "<li>No history found.</li>";
+          return;
+        }
+        results.forEach((page) => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <strong>${page.title || "(no title)"}</strong><br>
+            <a href="${page.url}" target="_blank">${page.url}</a><br>
+            <small>${new Date(page.lastVisitTime).toLocaleString()}</small>
+          `;
+          historyList.appendChild(li);
+        });
+      }
+    );
+  }
+
+  // Show last 10 history items on load
+  loadHistory("", 10);
+
+  // Live search (show up to 50 results)
+  searchBox.addEventListener("input", (e) => {
+    loadHistory(e.target.value, 50);
+  });
+});//dummy section for the is https nofification
 //dummy section for the web traffic alert notification

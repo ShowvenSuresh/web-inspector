@@ -340,3 +340,106 @@ input:checked+.slider:before {
   display: flex;
   gap: 1rem;
 }
+
+
+
+/* Page wrapper */
+#historyPage {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 16px;
+  min-height: 100%;
+  background: white;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* force fit to popup height */
+}
+
+/* Title */
+#historyPage h1 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: black;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* Search box */
+#searchHistory {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid black;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+#searchHistory:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* History list wrapper (scrollable) */
+#historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  /* take remaining space */
+  overflow-y: auto;
+  /* scroll if needed */
+  max-height: 100%;
+  /* fit inside popup */
+}
+
+/* History items (compact cards) */
+#historyList li {
+  background: white;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #f3f4f6;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+#historyList li:hover {
+  background: #dbeafe;
+  transform: translateX(2px);
+}
+
+/* Title text */
+#historyList strong {
+  font-size: 13px;
+  color: #111827;
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Link */
+#historyList a {
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+#historyList a:hover {
+  text-decoration: underline;
+}
+
+/* Timestamp */
+#historyList small {
+  font-size: 11px;
+  color: #6b7280;
+  display: block;
+  margin-top: 2px;
+}
