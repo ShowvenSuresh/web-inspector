@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Test Malicious Popup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="showMaliciousPopup()">Simulate Malicious Notification</button>
+
+  <script>
+    function showMaliciousPopup() {
+      if (document.getElementById("malicious-warning")) return;
+
+      const domain = "test-example.com";
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <div id="malicious-warning" style="
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 340px;
+          background: #fff3f3;
+          border: 2px solid #d63031;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          font-family: Arial, sans-serif;
+          z-index: 999999;
+          animation: slideIn 0.4s ease;
+        ">
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #d63031;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+          ">
+            🚨 Malicious Traffic Detected
+            <button id="close-malicious" style="
+              background: transparent;
+              border: none;
+              color: white;
+              font-size: 18px;
+              cursor: pointer;
+            ">&times;</button>
+          </div>
+          <div style="padding: 15px; font-size: 14px; color: #333;">
+            <p>Suspicious activity detected from <strong>${domain}</strong>.</p>
+            <div style="margin-top:10px;">
+              <button id="go-alerts" style="
+                background:#e17055; color:white; border:none; padding:6px 12px; border-radius:6px; margin-right:8px; cursor:pointer;">
+                Go to Alerts
+              </button>
+              <button id="block-domain" style="
+                background:#d63031; color:white; border:none; padding:6px 12px; border-radius:6px; margin-right:8px; cursor:pointer;">
+                Block Domain
+              </button>
+              <button id="dismiss" style="
+                background:#ddd; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(wrapper);
+
+      // Buttons
+      document.getElementById("close-malicious").onclick = () => wrapper.remove();
+      document.getElementById("dismiss").onclick = () => wrapper.remove();
+      document.getElementById("go-alerts").onclick = () => {
+        alert("Go to Alerts clicked (in extension, this opens Alerts tab)");
+        wrapper.remove();
+      };
+      document.getElementById("block-domain").onclick = () => {
+        alert("Block domain clicked (in extension, this saves to storage)");
+        wrapper.remove();
+      };
+    }
+
+    // animation
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>
