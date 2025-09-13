@@ -183,14 +183,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "alert-card";
 
+      const badgeClass =
+        alert.classification === "Malicious"
+          ? "status-badge status-malicious"
+          : "status-badge status-benign";
+
       card.innerHTML = `
       <div class="alert-header">
-        <span class="alert-title">${alert.domain} - ${alert.classification}</span>
+        <span class="alert-title">${alert.domain}</span>
+        <span class="${badgeClass}">${alert.classification}</span>
       </div>
       <div class="alert-actions">
-        <button class="block-btn">Block Domain</button>
-        <button class="dismiss-btn">Dismiss</button>
-        <button class="see-more-btn">See More</button>
+        <button class="block-btn">🚫 Block</button>
+        <button class="dismiss-btn">✖ Dismiss</button>
+        <button class="see-more-btn">🔽 See More</button>
       </div>
       <div class="alert-details">
         <p><b>Method:</b> ${alert.method}</p>
@@ -204,15 +210,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const seeMoreBtn = card.querySelector(".see-more-btn");
       seeMoreBtn.addEventListener("click", () => {
         card.classList.toggle("expanded");
-        seeMoreBtn.textContent = card.classList.contains("expanded") ? "See Less" : "See More";
+        seeMoreBtn.textContent = card.classList.contains("expanded")
+          ? "🔼 See Less"
+          : "🔽 See More";
       });
 
-      // Dismiss Alert
+      // Dismiss
       card.querySelector(".dismiss-btn").addEventListener("click", () => {
         card.remove();
       });
 
-      // Block Domain (example)
+      // Block
       card.querySelector(".block-btn").addEventListener("click", () => {
         alert(`Domain ${alert.domain} has been blocked.`);
       });
@@ -221,7 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initialize
   renderAlerts();
 });
 //dummy section for the history tab

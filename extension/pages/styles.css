@@ -446,39 +446,73 @@ input:checked+.slider:before {
 
 
 
-/* the ale rt page Page wrapper */
+/* Page wrapper */
 #alertsPage {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   min-height: 100vh;
-  background: white;
+  background: linear-gradient(135deg, #f0f4ff, #e6f7ff);
+  display: flex;
+  flex-direction: column;
 }
 
-/* Title */
+/* Sticky Header */
 #alertsPage h1 {
   font-size: 22px;
   margin-bottom: 16px;
-  color: black;
+  color: #2c3e50;
   font-weight: 700;
   text-align: left;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  padding: 10px 0;
+  z-index: 10;
 }
 
-/* Alert Card */
+/* Alerts List - scrollable */
+#alertsList {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Scrollbar */
+#alertsList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#alertsList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+#alertsList::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 8px;
+}
+
+#alertsList::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Alert Card with glassmorphism */
 .alert-card {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
   padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: 0.3s;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .alert-card:hover {
-  transform: scale(1.01);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 
+/* Header inside card */
 .alert-header {
   display: flex;
   justify-content: space-between;
@@ -488,22 +522,49 @@ input:checked+.slider:before {
 .alert-title {
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: #2c3e50;
 }
 
+/* Status Badge */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.status-malicious {
+  background: #e74c3c;
+}
+
+.status-benign {
+  background: #2ecc71;
+}
+
+/* Actions */
 .alert-actions {
   margin-top: 12px;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 button {
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  transition: 0.2s;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
 }
 
 .block-btn {
@@ -511,43 +572,46 @@ button {
   color: white;
 }
 
-.dismiss-btn {
-  background: #bdc3c7;
-  color: black;
-}
-
 .block-btn:hover {
   background: #c0392b;
 }
 
-.dismiss-btn:hover {
+.dismiss-btn {
   background: #95a5a6;
+  color: white;
 }
 
-/* See More Dropdown */
-.alert-details {
-  display: none;
-  margin-top: 12px;
-  padding: 10px;
-  border-top: 1px solid #ddd;
-  font-size: 13px;
-  color: #555;
-  background: #f4f6f8;
-  border-radius: 8px;
-}
-
-.alert-card.expanded .alert-details {
-  display: block;
+.dismiss-btn:hover {
+  background: #7f8c8d;
 }
 
 .see-more-btn {
   background: #3498db;
   color: white;
-  margin-top: 10px;
 }
 
 .see-more-btn:hover {
   background: #2980b9;
+}
+
+/* Expandable details */
+.alert-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  margin-top: 0;
+  padding: 0 10px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+.alert-card.expanded .alert-details {
+  max-height: 300px;
+  /* adjust if needed */
+  margin-top: 12px;
+  padding: 12px;
 }
 
 /* Alerts List - make it scrollable */
