@@ -126,6 +126,104 @@ trafficData.forEach(item => {
 
 
 //dummy section for the alert tab 
+const alertsList = document.getElementById("alertsList");
+
+// Example data (replace with backend data)
+const alertsData = [
+  {
+    id: 1,
+    domain: "malicious-site.com",
+    classification: "Malicious",
+    method: "POST",
+    path: "/login",
+    features: {
+      single_q: 3,
+      double_q: 1,
+      dashes: 0,
+      braces: 2,
+      spaces: 20,
+      percentages: 1,
+      semicolons: 0,
+      angle_brackets: 5,
+      special_chars: 2,
+      path_length: 10,
+      body_length: 200,
+      badwords_count: 2
+    }
+  },
+  {
+    id: 2,
+    domain: "safe-site.com",
+    classification: "Benign",
+    method: "GET",
+    path: "/home",
+    features: {
+      single_q: 0,
+      double_q: 0,
+      dashes: 0,
+      braces: 0,
+      spaces: 10,
+      percentages: 0,
+      semicolons: 0,
+      angle_brackets: 0,
+      special_chars: 0,
+      path_length: 5,
+      body_length: 50,
+      badwords_count: 0
+    }
+  }
+];
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  function renderAlerts() {
+    alertsList.innerHTML = "";
+    alertsData.forEach(alert => {
+      const card = document.createElement("div");
+      card.className = "alert-card";
+
+      card.innerHTML = `
+      <div class="alert-header">
+        <span class="alert-title">${alert.domain} - ${alert.classification}</span>
+      </div>
+      <div class="alert-actions">
+        <button class="block-btn">Block Domain</button>
+        <button class="dismiss-btn">Dismiss</button>
+        <button class="see-more-btn">See More</button>
+      </div>
+      <div class="alert-details">
+        <p><b>Method:</b> ${alert.method}</p>
+        <p><b>Path:</b> ${alert.path}</p>
+        <p><b>Features:</b></p>
+        <pre>${JSON.stringify(alert.features, null, 2)}</pre>
+      </div>
+    `;
+
+      // Toggle See More
+      const seeMoreBtn = card.querySelector(".see-more-btn");
+      seeMoreBtn.addEventListener("click", () => {
+        card.classList.toggle("expanded");
+        seeMoreBtn.textContent = card.classList.contains("expanded") ? "See Less" : "See More";
+      });
+
+      // Dismiss Alert
+      card.querySelector(".dismiss-btn").addEventListener("click", () => {
+        card.remove();
+      });
+
+      // Block Domain (example)
+      card.querySelector(".block-btn").addEventListener("click", () => {
+        alert(`Domain ${alert.domain} has been blocked.`);
+      });
+
+      alertsList.appendChild(card);
+    });
+  }
+
+  // Initialize
+  renderAlerts();
+});
 //dummy section for the history tab
 document.addEventListener("DOMContentLoaded", () => {
   const historyList = document.getElementById("historyList");
@@ -165,5 +263,4 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBox.addEventListener("input", (e) => {
     loadHistory(e.target.value, 50);
   });
-});//dummy section for the is https nofification
-//dummy section for the web traffic alert notification
+});

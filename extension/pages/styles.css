@@ -443,3 +443,137 @@ input:checked+.slider:before {
   display: block;
   margin-top: 2px;
 }
+
+
+
+/* the ale rt page Page wrapper */
+#alertsPage {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  min-height: 100vh;
+  background: white;
+}
+
+/* Title */
+#alertsPage h1 {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: black;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* Alert Card */
+.alert-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+}
+
+.alert-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.alert-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.block-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.dismiss-btn {
+  background: #bdc3c7;
+  color: black;
+}
+
+.block-btn:hover {
+  background: #c0392b;
+}
+
+.dismiss-btn:hover {
+  background: #95a5a6;
+}
+
+/* See More Dropdown */
+.alert-details {
+  display: none;
+  margin-top: 12px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  font-size: 13px;
+  color: #555;
+  background: #f4f6f8;
+  border-radius: 8px;
+}
+
+.alert-card.expanded .alert-details {
+  display: block;
+}
+
+.see-more-btn {
+  background: #3498db;
+  color: white;
+  margin-top: 10px;
+}
+
+.see-more-btn:hover {
+  background: #2980b9;
+}
+
+/* Alerts List - make it scrollable */
+#alertsList {
+  max-height: 70vh;
+  /* keeps space for header/buttons */
+  overflow-y: auto;
+  padding-right: 6px;
+  /* space for scrollbar */
+}
+
+/* Optional: style the scrollbar */
+#alertsList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#alertsList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+#alertsList::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+
+#alertsList::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -92,9 +92,6 @@ async function sendToBackend(features) {
 
 }
 
-function generatrafficNotification(features) {
-
-}
 
 //intercept the web request
 chrome.webRequest.onBeforeRequest.addListener(
@@ -132,5 +129,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log("http detection error", e)
   }
 });
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type === "open-alerts") {
+    chrome.action.openPopup(); // opens dashboard.html
+    // optionally, tell dashboard to switch to Alerts tab
+  }
+
+  if (msg.type === "block-domain" && msg.domain) {
+    chrome.storage.local.get({ blocked: [] }, (data) => {
+      const updated = [...new Set([...data.blocked, msg.domain])];
+      chrome.storage.local.set({ blocked: updated });
+    });
+  }
+});
+
 
 
