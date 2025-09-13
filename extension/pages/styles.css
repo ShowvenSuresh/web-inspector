@@ -451,7 +451,7 @@ input:checked+.slider:before {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff, #e6f7ff);
+  background: white;
   display: flex;
   flex-direction: column;
 }
