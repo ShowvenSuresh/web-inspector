@@ -74,6 +74,7 @@ function extractFeatures(details) {
 
 async function sendToBackend(features) {
   try {
+    console.log(features)
     const response = await fetch('http://127.0.0.1:8000/predict', {
       method: 'POST',
       headers: {
