@@ -6,6 +6,20 @@ from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import pandas as pd
 import numpy as np
+import csv
+import os
+
+def log_features_to_csv(features: dict, filename="good_log.csv"):
+    # Add fixed "class" column
+    row = {**features, "class": "good"}
+
+    # If file doesn't exist, create with headers
+    file_exists = os.path.isfile(filename)
+    with open(filename, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=row.keys())
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
 
 # =========================
 # FASTAPI SETUP
@@ -96,6 +110,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 @app.post("/predict")
 def predict(features: Features):
+    log_features_to_csv(features.model_dump())
     X_scaled = preprocess_features(features)
 
     results = {}
