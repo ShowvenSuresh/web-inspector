@@ -1,10 +1,16 @@
+
 from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import joblib
+import pandas as pd
+import numpy as np
 
+# =========================
+# FASTAPI SETUP
+# =========================
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,6 +20,9 @@ app.add_middleware(
     allow_credentials=True,
 )
 
+# =========================
+# Pydantic model (API schema)
+# =========================
 class Features(BaseModel):
     method: str
     path: str
@@ -31,17 +40,79 @@ class Features(BaseModel):
     body_length: int
     badwords_count: int
 
+# =========================
+# Load models & preprocessing artifacts
+# =========================
+ord_enc = joblib.load("./models/ordinal_encoder.pkl")
+scaler = joblib.load("./models/scaler.pkl")
+feature_columns = joblib.load("./models/feature_columns.pkl")
+label_map = joblib.load("./models/label_map.pkl")
+
+# Load one or more trained models
+models = {
+    "svm": joblib.load("./models/svm_model.pkl"),
+    "random_forest": joblib.load("./models/random_forest_model.pkl"),
+    "knn": joblib.load("./models/knn_model.pkl"),
+}
+
+reverse_label_map = {v: k for k, v in label_map.items()}
+
+# =========================
+# Utility: extract engineered features from request
+# =========================
+def preprocess_features(features: Features):
+    df = pd.DataFrame([features.dict()])
+
+    # Drop unused columns
+    df = df.drop(columns=["body", "path"], errors="ignore")
+
+    # Encode categorical (method)
+    if features.method not in ord_enc.categories_[0]:
+        df["method"] = "missing"
+    X_cat = ord_enc.transform(df[["method"]])
+    X_cat_df = pd.DataFrame(X_cat, columns=["method_enc"])
+
+    # Drop raw method
+    df = df.drop(columns=["method"])
+
+    # Merge encoded categorical + numeric
+    X = pd.concat([X_cat_df.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
+
+    # Reindex to match training
+    X = X.reindex(columns=feature_columns, fill_value=0)
+
+    # Scale
+    X_scaled = scaler.transform(X)
+    return X_scaled# =========================
+# Routes
+# =========================
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
-@app.get("item/{item_id}")
+@app.get("/item/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None): 
-    return{"item_id": item_id, "q": q} 
-
+    return {"item_id": item_id, "q": q}
 
 @app.post("/predict")
-def predict(features:Features):
-    #print(features)
-    return {"extrated features - main.py": features
-        ,"sent":"recived"}
+def predict(features: Features):
+    X_scaled = preprocess_features(features)
+
+    results = {}
+    for name, model in models.items():
+        if hasattr(model, "predict_proba"):
+            proba = model.predict_proba(X_scaled)[0]
+            pred_class = int(model.predict(X_scaled)[0])
+            results[name] = {
+                "prediction": reverse_label_map[pred_class],
+                "probabilities": {reverse_label_map[0]: float(proba[0]), reverse_label_map[1]: float(proba[1])}
+            }
+        else:
+            pred_class = int(model.predict(X_scaled)[0])
+            results[name] = {"prediction": reverse_label_map[pred_class]}
+
+    return {
+        "input": features.dict(),
+        "results": results
+    }
+
