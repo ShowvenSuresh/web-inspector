@@ -67,6 +67,7 @@ models = {
     "svm": joblib.load("./models/svm_model.pkl"),
     "random_forest": joblib.load("./models/random_forest_model.pkl"),
     "knn": joblib.load("./models/knn_model.pkl"),
+    "stacked": joblib.load("./models/stacked_model.pkl"),
 }
 
 reverse_label_map = {v: k for k, v in label_map.items()}
@@ -110,7 +111,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 @app.post("/predict")
 def predict(features: Features):
-    log_features_to_csv(features.model_dump())
+    #log_features_to_csv(features.model_dump())
     X_scaled = preprocess_features(features)
 
     results = {}
