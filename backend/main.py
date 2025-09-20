@@ -21,9 +21,7 @@ def log_features_to_csv(features: dict, filename="good_log.csv"):
             writer.writeheader()
         writer.writerow(row)
 
-# =========================
-# FASTAPI SETUP
-# =========================
+# the fast api setup
 app = FastAPI()
 
 app.add_middleware(
@@ -34,9 +32,7 @@ app.add_middleware(
     allow_credentials=True,
 )
 
-# =========================
-# Pydantic model (API schema)
-# =========================
+#the base model for features
 class Features(BaseModel):
     method: str
     path: str
@@ -54,15 +50,13 @@ class Features(BaseModel):
     body_length: int
     badwords_count: int
 
-# =========================
-# Load models & preprocessing artifacts
-# =========================
+# Load all the preprossind model to process the features
 ord_enc = joblib.load("./models/ordinal_encoder.pkl")
 scaler = joblib.load("./models/scaler.pkl")
 feature_columns = joblib.load("./models/feature_columns.pkl")
 label_map = joblib.load("./models/label_map.pkl")
 
-# Load one or more trained models
+# load all the  trained models
 models = {
     "svm": joblib.load("./models/svm_model.pkl"),
     "random_forest": joblib.load("./models/random_forest_model.pkl"),
@@ -72,11 +66,9 @@ models = {
 
 reverse_label_map = {v: k for k, v in label_map.items()}
 
-# =========================
-# Utility: extract engineered features from request
-# =========================
+#Process the features 
 def preprocess_features(features: Features):
-    df = pd.DataFrame([features.dict()])
+    df = pd.DataFrame([features.model_dump()])
 
     # Drop unused columns
     df = df.drop(columns=["body", "path"], errors="ignore")
@@ -98,16 +90,12 @@ def preprocess_features(features: Features):
 
     # Scale
     X_scaled = scaler.transform(X)
-    return X_scaled# =========================
-# Routes
-# =========================
-@app.get("/")
+    return X_scaled
+
+# the backend server routes 
+@app.get("/") # testing the api this is the route 
 def read_root():
     return {"Hello": "World"}
-
-@app.get("/item/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None): 
-    return {"item_id": item_id, "q": q}
 
 @app.post("/predict")
 def predict(features: Features):
@@ -127,8 +115,9 @@ def predict(features: Features):
             pred_class = int(model.predict(X_scaled)[0])
             results[name] = {"prediction": reverse_label_map[pred_class]}
 
+        # TODO: add the classified data into the existing dataset for retraining
     return {
-        "input": features.dict(),
+        "input": features.model_dump(),
         "results": results
     }
 
