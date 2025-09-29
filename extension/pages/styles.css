@@ -641,3 +641,25 @@ button:hover {
 #alertsList::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+
+.recent-alert {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.alert-class.malicious {
+  color: red;
+  font-weight: bold;
+}
+
+.alert-class.benign {
+  color: green;
+}
+
+.alert-class.suspicious {
+  color: orange;
+}

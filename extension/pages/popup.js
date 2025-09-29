@@ -68,9 +68,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // live stats section
 document.addEventListener("DOMContentLoaded", () => {
+  const requestsCount = document.getElementById("requestsCount");
+  const blockedCount = document.getElementById("blockedCount");
+  const alertsCount = document.getElementById("alertsCount");
+  const avgTime = document.getElementById("avgTime");
+  const recentAlertsList = document.getElementById("recentAlertsList");
 
-})
+  function render(stats, recentAlerts) {
+    requestsCount.textContent = stats.requests ?? 0;
+    blockedCount.textContent = stats.blocked ?? 0;
+    alertsCount.textContent = stats.alerts ?? 0;
+    avgTime.textContent = `${stats.avgTime ?? 0} ms`;
 
+    recentAlertsList.innerHTML = "";
+    (recentAlerts || []).forEach((alert) => {
+      const div = document.createElement("div");
+      div.className = "recent-alert";
+      div.innerHTML = `
+        <span class="alert-class ${alert.classification?.toLowerCase()}">
+          ${alert.classification}
+        </span>
+        <span class="alert-url">${alert.url}</span>
+        <span class="alert-time">${alert.time}</span>
+      `;
+      recentAlertsList.appendChild(div);
+    });
+  }
+
+  // 🔹 Load latest stats when popup opens
+  chrome.storage.local.get(["stats", "recentAlerts"], (data) => {
+    render(data.stats || {}, data.recentAlerts || []);
+  });
+
+  // 🔹 Also listen for live updates while popup is open
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "statsUpdate") {
+      render(msg.stats, msg.recentAlerts);
+    }
+  });
+});
 //dummy section for the traffic data
 const trafficData = [
   {

@@ -7,6 +7,18 @@ const badwords = [
   'delete', 'xp_', 'or 1=1'
 ]
 
+// Global stats
+let stats = {
+  requests: 0,
+  blocked: 0,
+  alerts: 0,
+  avgTime: 0,
+};
+
+let recentAlerts = [];
+const MAX_ALERTS = 5;
+
+
 let monitoringEnabled = true;
 
 // Initialize monitoring state from storage when service worker starts
@@ -75,6 +87,7 @@ function extractFeatures(details) {
 async function sendToBackend(features) {
   try {
     //    console.log(features)
+    const start = Date.now();
     const response = await fetch('http://127.0.0.1:8000/predict', {
       method: 'POST',
       headers: {
@@ -85,6 +98,14 @@ async function sendToBackend(features) {
 
     const result = await response.json();
     console.log('Classification result:', result);
+    const elapsed = Date.now() - start;
+
+    // update avg time
+    stats.avgTime =
+      stats.requests === 0
+        ? elapsed
+        : Math.round((stats.avgTime * (stats.requests - 1) + elapsed) / stats.requests);
+
     return result
 
   } catch (error) {
@@ -103,8 +124,31 @@ chrome.webRequest.onBeforeRequest.addListener(
         details.url.includes("/analytics") || details.url.includes("/telemetry")) {
         return;
       }
+      stats.requests++;
+
       const features = extractFeatures(details)
       const result = sendToBackend(features)
+
+      if (result.classification === "Malicious") {
+        stats.blocked++;
+        stats.alerts++;
+
+        recentAlerts.unshift({
+          time: new Date().toLocaleTimeString(),
+          url: details.url,
+          classification: result.classification,
+        });
+
+        if (recentAlerts.length > MAX_ALERTS) {
+          recentAlerts.pop();
+        }
+      }
+
+      // background.js (inside webRequest listener, after updating stats/recentAlerts)
+      chrome.storage.local.set({ stats, recentAlerts });
+      // try sendMessage, but ignore errors
+      chrome.runtime.sendMessage({ type: "statsUpdate", stats, recentAlerts }).catch(() => { });
+
       //todo--> send to backend for classification using post method
       //generate the popup if the results is bad
     } catch (error) {
