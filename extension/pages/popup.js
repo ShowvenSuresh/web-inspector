@@ -107,60 +107,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-//dummy section for the traffic data
-const trafficData = [
-  {
-    status: "safe",
-    method: "GET",
-    time: "10:30:45",
-    url: "https://example.com/api/data",
-    length: 28,
-    entropy: 3.2,
-    headers: 8
-  },
-  {
-    status: "malicious",
-    method: "POST",
-    time: "10:31:12",
-    url: "https://malicious-site.com/payload",
-    length: 35,
-    entropy: 4.8,
-    headers: 12
-  },
 
-  {
-    status: "suspicious",
-    method: "GET",
-    time: "10:32:01",
-    url: "https://suspicious.net/track",
-    length: 29,
-    entropy: 4.1,
-    headers: 10
+// Live traffic logging
+
+document.addEventListener("DOMContentLoaded", () => {
+  const trafficList = document.getElementById("traffic-list");
+  function renderTraffic(trafficLog) {
+    trafficList.innerHTML = "";
+
+    if (!trafficLog || trafficLog.length === 0) {
+      trafficList.innerHTML = `<p class="empty">No traffic captured</p>`;
+      return;
+    }
+
+    trafficLog.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "traffic-item";
+
+      // shorten the URL
+      const shortUrl = item.url.length > 60 ? item.url.slice(0, 60) + "..." : item.url;
+
+      // map classification -> CSS class
+      let statusClass = "unknown";
+      if (item.classification === "good" || item.classification === "safe") {
+        statusClass = "safe";
+      } else if (item.classification === "bad" || item.classification === "malicious") {
+        statusClass = "malicious";
+      } else if (item.classification === "suspicious") {
+        statusClass = "suspicious";
+      }
+
+      // extract website/domain
+      let domain = "";
+      try {
+        domain = new URL(item.url).hostname;
+      } catch (e) {
+        domain = "Unknown";
+      }
+
+      div.innerHTML = `
+      <div class="traffic-header">
+        <span class="status ${statusClass}">${statusClass}</span>
+        <span><span class="method">${item.method}</span> ${item.time}</span>
+      </div>
+      <div class="url">${shortUrl}</div>
+      <div class="domain">🌐 ${domain}</div>
+    `;
+
+      trafficList.appendChild(div);
+    });
   }
-];
+  // Load existing traffic on popup open
+  chrome.storage.local.get(["trafficLog"], (data) => {
+    renderTraffic(data.trafficLog || []);
+  });
 
-const trafficList = document.getElementById("traffic-list");
-
-trafficData.forEach(item => {
-  const div = document.createElement("div");
-  div.className = "traffic-item";
-
-  div.innerHTML = `
-    <div class="traffic-header">
-      <span class="status ${item.status}">${item.status}</span>
-      <span><span class="method">${item.method}</span> ${item.time}</span>
-    </div>
-    <div class="url">${item.url}</div>
-    <div class="meta">
-      
-    </div>
-  `;
-
-  trafficList.appendChild(div);
+  //  Listen for live updates
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "statsUpdate") {
+      renderTraffic(msg.trafficLog || []);
+    }
+  });
 });
-
-
-
 //dummy section for the alert tab 
 const alertsList = document.getElementById("alertsList");
 

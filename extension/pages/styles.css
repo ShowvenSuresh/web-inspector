@@ -270,76 +270,97 @@ input:checked+.slider:before {
 }
 
 
+
+/* Container */
 .traffic-container {
-  max-width: 400px;
-  margin: auto;
+  padding: 15px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #333;
+  max-height: 400px;
+  /* scrollable if many logs */
+  overflow-y: auto;
 }
 
-.subtitle {
-  font-size: 0.9rem;
+/* Section title */
+.traffic-container h2 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.traffic-container .subtitle {
+  font-size: 13px;
   color: #666;
-  margin-bottom: 1rem;
+  margin-bottom: 12px;
 }
 
-.traffic-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
+/* Each traffic item */
 .traffic-item {
   background: #fff;
-  border-radius: 12px;
-  padding: 0.9rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
+.traffic-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Header: status + method/time */
 .traffic-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
 }
 
+/* Status badges */
 .status {
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .status.safe {
-  background: #e0f9ec;
-  color: #198754;
+  background: #d4edda;
+  color: #155724;
 }
 
 .status.malicious {
-  background: #fde8e8;
-  color: #dc3545;
+  background: #f8d7da;
+  color: #721c24;
 }
 
 .status.suspicious {
-  background: #fff5d9;
-  color: #b8860b;
+  background: #fff3cd;
+  color: #856404;
 }
 
-.method {
-  font-weight: bold;
-  margin-left: 0.5rem;
-}
-
+/* URL */
 .url {
-  font-size: 0.9rem;
-  margin: 0.4rem 0;
+  font-size: 13px;
+  color: #0073e6;
   word-break: break-all;
+  margin-bottom: 4px;
 }
 
+/* Metadata (optional extra info like time, method) */
 .meta {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: #555;
-  display: flex;
-  gap: 1rem;
 }
+
+.domain {
+  font-size: 12px;
+  color: #6b7280;
+  /* gray */
+  margin-top: 2px;
+}
+
 
 
 

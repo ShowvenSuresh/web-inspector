@@ -16,7 +16,9 @@ let stats = {
 };
 
 let recentAlerts = [];
+let trafficLog = [];
 const MAX_ALERTS = 5;
+const MAX_LOGS = 50;
 
 
 let monitoringEnabled = true;
@@ -115,51 +117,84 @@ async function sendToBackend(features) {
 }
 
 
-//intercept the web request
+// intercept the web request
 chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    if (!monitoringEnabled) return
+  async (details) => {   // <-- make this async
+    if (!monitoringEnabled) return;
+
     try {
-      if (details.url.startsWith("http://127.0.0.1:8000/predict") || details.url.startsWith("chrome-extension://") || details.url.includes("/v1/traces") ||
-        details.url.includes("/analytics") || details.url.includes("/telemetry")) {
+      if (
+        details.url.startsWith("http://127.0.0.1:8000/predict") ||
+        details.url.startsWith("chrome-extension://") ||
+        details.url.includes("/v1/traces") ||
+        details.url.includes("/analytics") ||
+        details.url.includes("/telemetry")
+      ) {
         return;
       }
+
       stats.requests++;
 
-      const features = extractFeatures(details)
-      const result = sendToBackend(features)
+      const features = extractFeatures(details);
+      const result = await sendToBackend(features);  // <-- await
+      if (!result) return; // backend failed
 
-      if (result.classification === "Malicious") {
-        stats.blocked++;
+      // Use stacked prediction
+      const classification = result?.results?.stacked?.prediction;
+
+      // --- Traffic log (all requests)
+      trafficLog.unshift({
+        time: new Date().toLocaleTimeString(),
+        url: details.url,
+        method: details.method,
+        classification
+      });
+      if (trafficLog.length > MAX_LOGS) {
+        trafficLog.pop();
+      }
+
+      if (classification === "bad") {
+        //stats.blocked++;
         stats.alerts++;
 
         recentAlerts.unshift({
           time: new Date().toLocaleTimeString(),
           url: details.url,
-          classification: result.classification,
+          method: details.method,
+          classification,
         });
 
         if (recentAlerts.length > MAX_ALERTS) {
           recentAlerts.pop();
         }
+
+        // Inject warning only if tabId is valid
+        if (details.tabId && details.tabId > 0) {
+          chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ["/content/trafficNotification.js"],
+          });
+        }
       }
 
-      // background.js (inside webRequest listener, after updating stats/recentAlerts)
-      chrome.storage.local.set({ stats, recentAlerts });
-      // try sendMessage, but ignore errors
-      chrome.runtime.sendMessage({ type: "statsUpdate", stats, recentAlerts }).catch(() => { });
+      // Save and broadcast stats
+      chrome.storage.local.set({ stats, recentAlerts, trafficLog }, () => {
+        console.log("Saved traffic log:", trafficLog.length);
+      });
 
-      //todo--> send to backend for classification using post method
-      //generate the popup if the results is bad
+      chrome.runtime.sendMessage({
+        type: "statsUpdate",
+        stats,
+        recentAlerts,
+        trafficLog
+      }).catch(() => { });
     } catch (error) {
-      console.log("error interceptin request ")
+      console.log("error intercepting request", error);
     }
   },
-  { urls: ["<all_urls>",] },
+  { urls: ["<all_urls>"] },
   ["requestBody"]
-
 );
-
 
 //checking weather the website is https
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
