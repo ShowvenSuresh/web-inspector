@@ -204,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="alert-header">
           <span class="alert-title">🌐 ${alert.domain || "Unknown Domain"}</span>
-          <span class="${badgeClass}">${alert.classification || "unknown"}</span>
+          <span class="${badgeClass}">${"malicious" || "unknown"}</span>
         </div>
         <div class="alert-actions">
           <button class="block-btn">🚫 Block</button>
