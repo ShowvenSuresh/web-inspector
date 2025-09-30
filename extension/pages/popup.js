@@ -79,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     blockedCount.textContent = stats.blocked ?? 0;
     alertsCount.textContent = stats.alerts ?? 0;
     avgTime.textContent = `${stats.avgTime ?? 0} ms`;
+    let classificationLabel = "malicious"
 
     recentAlertsList.innerHTML = "";
     (recentAlerts || []).forEach((alert) => {
@@ -86,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       div.className = "recent-alert";
       div.innerHTML = `
         <span class="alert-class ${alert.classification?.toLowerCase()}">
-          ${alert.classification}
+          ${classificationLabel}
         </span>
         <span class="alert-url">${alert.url}</span>
         <span class="alert-time">${alert.time}</span>
