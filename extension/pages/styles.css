@@ -534,105 +534,99 @@ input:checked+.slider:before {
 }
 
 /* Header inside card */
+.alert-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: transform 0.2s ease;
+}
+
+.alert-card:hover {
+  transform: scale(1.01);
+}
+
 .alert-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .alert-title {
+  font-weight: 600;
   font-size: 16px;
-  font-weight: bold;
-  color: #2c3e50;
 }
 
-/* Status Badge */
 .status-badge {
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
-  color: white;
+  font-weight: bold;
+  text-transform: capitalize;
 }
 
 .status-malicious {
-  background: #e74c3c;
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #c62828;
 }
 
 .status-benign {
-  background: #2ecc71;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
 }
 
-/* Actions */
 .alert-actions {
-  margin-top: 12px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
-button {
-  padding: 8px 14px;
+.alert-actions button {
+  margin-right: 8px;
+  padding: 5px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.3s, transform 0.2s;
-}
-
-button:hover {
-  transform: scale(1.05);
+  font-size: 13px;
 }
 
 .block-btn {
-  background: #e74c3c;
-  color: white;
-}
-
-.block-btn:hover {
-  background: #c0392b;
+  background: #ffcdd2;
+  color: #b71c1c;
 }
 
 .dismiss-btn {
-  background: #95a5a6;
-  color: white;
-}
-
-.dismiss-btn:hover {
-  background: #7f8c8d;
-}
-
-.see-more-btn {
-  background: #3498db;
-  color: white;
-}
-
-.see-more-btn:hover {
-  background: #2980b9;
-}
-
-/* Expandable details */
-.alert-details {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease, padding 0.3s ease;
-  margin-top: 0;
-  padding: 0 10px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  font-size: 13px;
+  background: #eeeeee;
   color: #555;
 }
 
+.see-more-btn {
+  background: #bbdefb;
+  color: #0d47a1;
+}
+
+.alert-details {
+  display: none;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
 .alert-card.expanded .alert-details {
-  max-height: 300px;
-  /* adjust if needed */
-  margin-top: 12px;
-  padding: 12px;
+  display: block;
+}
+
+.features-box {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  max-height: 120px;
+  /* scrollable if too long */
+  overflow-y: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
 }
 
 /* Alerts List - make it scrollable */

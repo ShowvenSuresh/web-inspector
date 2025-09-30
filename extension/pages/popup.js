@@ -169,86 +169,56 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-//dummy section for the alert tab 
-const alertsList = document.getElementById("alertsList");
-
-// Example data (replace with backend data)
-const alertsData = [
-  {
-    id: 1,
-    domain: "malicious-site.com",
-    classification: "Malicious",
-    method: "POST",
-    path: "/login",
-    features: {
-      single_q: 3,
-      double_q: 1,
-      dashes: 0,
-      braces: 2,
-      spaces: 20,
-      percentages: 1,
-      semicolons: 0,
-      angle_brackets: 5,
-      special_chars: 2,
-      path_length: 10,
-      body_length: 200,
-      badwords_count: 2
-    }
-  },
-  {
-    id: 2,
-    domain: "safe-site.com",
-    classification: "Benign",
-    method: "GET",
-    path: "/home",
-    features: {
-      single_q: 0,
-      double_q: 0,
-      dashes: 0,
-      braces: 0,
-      spaces: 10,
-      percentages: 0,
-      semicolons: 0,
-      angle_brackets: 0,
-      special_chars: 0,
-      path_length: 5,
-      body_length: 50,
-      badwords_count: 0
-    }
-  }
-];
-
 
 document.addEventListener("DOMContentLoaded", () => {
+  const alertsList = document.getElementById("alertsList");
 
-  function renderAlerts() {
+  function getReadableReason(alert) {
+    if (alert.classification === "malicious" || alert.classification === "bad") {
+      return "This request was flagged because it may contain suspicious or harmful patterns in the URL or body.";
+    }
+    if (alert.classification === "benign") {
+      return "This request was analyzed and found safe.";
+    }
+    return "No clear classification available.";
+  }
+
+  function renderAlerts(alertsLog) {
     alertsList.innerHTML = "";
-    alertsData.forEach(alert => {
+
+    if (!alertsLog || alertsLog.length === 0) {
+      alertsList.innerHTML = `<p class="empty">No alerts triggered</p>`;
+      return;
+    }
+
+    alertsLog.forEach(alert => {
       const card = document.createElement("div");
       card.className = "alert-card";
 
       const badgeClass =
-        alert.classification === "Malicious"
+        alert.classification === "bad" || alert.classification === "malicious"
           ? "status-badge status-malicious"
           : "status-badge status-benign";
 
       card.innerHTML = `
-      <div class="alert-header">
-        <span class="alert-title">${alert.domain}</span>
-        <span class="${badgeClass}">${alert.classification}</span>
-      </div>
-      <div class="alert-actions">
-        <button class="block-btn">🚫 Block</button>
-        <button class="dismiss-btn">✖ Dismiss</button>
-        <button class="see-more-btn">🔽 See More</button>
-      </div>
-      <div class="alert-details">
-        <p><b>Method:</b> ${alert.method}</p>
-        <p><b>Path:</b> ${alert.path}</p>
-        <p><b>Features:</b></p>
-        <pre>${JSON.stringify(alert.features, null, 2)}</pre>
-      </div>
-    `;
+        <div class="alert-header">
+          <span class="alert-title">🌐 ${alert.domain || "Unknown Domain"}</span>
+          <span class="${badgeClass}">${alert.classification || "unknown"}</span>
+        </div>
+        <div class="alert-actions">
+          <button class="block-btn">🚫 Block</button>
+          <button class="dismiss-btn">✖ Dismiss</button>
+          <button class="see-more-btn">🔽 See More</button>
+        </div>
+        <div class="alert-details">
+          <p><b>Domain:</b> ${alert.domain || "-"}</p>
+          <p><b>Method:</b> ${alert.method || "-"}</p>
+          <p><b>Path:</b> ${alert.path || "-"}</p>
+          <p><b>Description:</b> ${getReadableReason(alert)}</p>
+          <p><b>Features:</b></p>
+          <pre class="features-box">${JSON.stringify(alert.features || {}, null, 2)}</pre>
+        </div>
+      `;
 
       // Toggle See More
       const seeMoreBtn = card.querySelector(".see-more-btn");
@@ -273,8 +243,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  renderAlerts();
+  // Load alerts when popup opens
+  chrome.storage.local.get(["alertsLog"], (data) => {
+    renderAlerts(data.alertsLog || []);
+  });
+
+  // Listen for live updates from background.js
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "statsUpdate") {
+      renderAlerts(msg.alertsLog || []);
+    }
+  });
 });
+
 //dummy section for the history tab
 document.addEventListener("DOMContentLoaded", () => {
   const historyList = document.getElementById("historyList");

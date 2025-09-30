@@ -17,7 +17,8 @@ let stats = {
 
 let recentAlerts = [];
 let trafficLog = [];
-const MAX_ALERTS = 5;
+let alertsLog = [];
+const MAX_ALERTS = 20;
 const MAX_LOGS = 50;
 
 
@@ -119,7 +120,7 @@ async function sendToBackend(features) {
 
 // intercept the web request
 chrome.webRequest.onBeforeRequest.addListener(
-  async (details) => {   // <-- make this async
+  async (details) => {
     if (!monitoringEnabled) return;
 
     try {
@@ -136,11 +137,12 @@ chrome.webRequest.onBeforeRequest.addListener(
       stats.requests++;
 
       const features = extractFeatures(details);
-      const result = await sendToBackend(features);  // <-- await
+      const result = await sendToBackend(features);
       if (!result) return; // backend failed
 
-      // Use stacked prediction
-      const classification = result?.results?.stacked?.prediction;
+      // Normalize classification
+      const classification =
+        result?.results?.stacked?.prediction?.toLowerCase() || "unknown";
 
       // --- Traffic log (all requests)
       trafficLog.unshift({
@@ -149,26 +151,36 @@ chrome.webRequest.onBeforeRequest.addListener(
         method: details.method,
         classification
       });
-      if (trafficLog.length > MAX_LOGS) {
-        trafficLog.pop();
-      }
+      if (trafficLog.length > MAX_LOGS) trafficLog.pop();
 
-      if (classification === "bad") {
-        //stats.blocked++;
+      // --- Alerts log (full details, only for bad/malicious)
+      if (["bad", "malicious"].includes(classification)) {
         stats.alerts++;
 
+        const urlObj = new URL(details.url);
+
+        const alertEntry = {
+          id: Date.now(),
+          domain: urlObj.hostname,
+          classification,
+          method: details.method,
+          path: urlObj.pathname,
+          features: features // <-- keep raw extracted features here
+        };
+
+        alertsLog.unshift(alertEntry);
+        if (alertsLog.length > MAX_ALERTS) alertsLog.pop();
+
+        // Optional recentAlerts (for popup badge)
         recentAlerts.unshift({
           time: new Date().toLocaleTimeString(),
           url: details.url,
           method: details.method,
           classification,
         });
+        if (recentAlerts.length > MAX_ALERTS) recentAlerts.pop();
 
-        if (recentAlerts.length > MAX_ALERTS) {
-          recentAlerts.pop();
-        }
-
-        // Inject warning only if tabId is valid
+        // Inject warning popup in the active tab
         if (details.tabId && details.tabId > 0) {
           chrome.scripting.executeScript({
             target: { tabId: details.tabId },
@@ -177,16 +189,21 @@ chrome.webRequest.onBeforeRequest.addListener(
         }
       }
 
-      // Save and broadcast stats
-      chrome.storage.local.set({ stats, recentAlerts, trafficLog }, () => {
-        console.log("Saved traffic log:", trafficLog.length);
+      // Save everything
+      chrome.storage.local.set({ stats, trafficLog, alertsLog, recentAlerts }, () => {
+        console.log("Logs saved:", {
+          traffic: trafficLog.length,
+          alerts: alertsLog.length
+        });
       });
 
+      // Broadcast update
       chrome.runtime.sendMessage({
         type: "statsUpdate",
         stats,
-        recentAlerts,
-        trafficLog
+        trafficLog,
+        alertsLog,
+        recentAlerts
       }).catch(() => { });
     } catch (error) {
       console.log("error intercepting request", error);
@@ -195,6 +212,8 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ["<all_urls>"] },
   ["requestBody"]
 );
+
+
 
 //checking weather the website is https
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
