@@ -96,12 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🔹 Load latest stats when popup opens
+  //  Load latest stats when popup opens
   chrome.storage.local.get(["stats", "recentAlerts"], (data) => {
     render(data.stats || {}, data.recentAlerts || []);
   });
 
-  // 🔹 Also listen for live updates while popup is open
+  //  Also listen for live updates while popup is open
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === "statsUpdate") {
       render(msg.stats, msg.recentAlerts);
