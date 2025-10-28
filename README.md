@@ -132,21 +132,4 @@ If you retrain, make sure the new artifacts are written to backend/models/ (the 
 - Alerts tab: detailed cards for requests flagged as malicious/bad (includes raw extracted features)
 - History tab: simple browser history search
 
-## Troubleshooting
 
-- The popup remains at 0 requests
-  - Ensure the backend is running at http://127.0.0.1:8000
-  - Check that the extension is loaded and Developer mode is enabled
-- CORS or network errors in the console
-  - The backend enables CORS for all origins; verify the URL and that nothing else is listening on that port
-- No models found / crash on startup
-  - Ensure backend/models contains the required .pkl files listed above
-
-## Security and privacy
-
-- This is a local development tool. Do not transmit sensitive data to external services.
-- The extension inspects request bodies when available to extract features; use responsibly and only on systems you own or have permission to analyze.
-
-## Disclaimer
-
-This project is intended for research and educational purposes. It is not a replacement for enterprise security tools.
