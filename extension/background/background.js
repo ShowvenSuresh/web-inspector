@@ -243,5 +243,5 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   }
 });
 
-
+// add a section to extract the featueres needed for the ohishing detection
 
