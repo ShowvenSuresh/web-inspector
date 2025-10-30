@@ -69,46 +69,6 @@ The service exposes:
 
 When the backend is running, the popup Dashboard should begin showing live stats as you browse.
 
-## API
-
-POST /predict
-- Content-Type: application/json
-- Request body (schema mirrors backend.Features):
-
-{
-  "method": "POST",
-  "path": "/api/login",
-  "body": "username=admin' OR '1'='1&password=...",
-  "single_q": 3,
-  "double_q": 0,
-  "dashes": 0,
-  "braces": 0,
-  "spaces": 5,
-  "percentages": 0,
-  "semicolons": 0,
-  "angle_brackets": 0,
-  "special_chars": 1,
-  "path_length": 10,
-  "body_length": 42,
-  "badwords_count": 2
-}
-
-Example response:
-
-{
-  "input": { ... },
-  "results": {
-    "svm": { "prediction": "good" },
-    "random_forest": { "prediction": "bad", "probabilities": { "good": 0.12, "bad": 0.88 } },
-    "knn": { "prediction": "bad", "probabilities": { "good": 0.33, "bad": 0.67 } },
-    "stacked": { "prediction": "bad", "probabilities": { "good": 0.05, "bad": 0.95 } }
-  }
-}
-
-Notes
-- The backend aligns incoming features to the training feature_columns.pkl and scales them with scaler.pkl.
-- The final decision the extension uses in background.js is results.stacked.prediction when available.
-
 ## Model training and artifacts
 
 - Training script: backend/retrain.py
