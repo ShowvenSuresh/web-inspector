@@ -8,6 +8,10 @@ import pandas as pd
 import numpy as np
 import csv
 import os
+import subprocess
+import threading
+import time
+from datetime import datetime, timedelta
 
 def log_features_to_csv(features: dict, filename="good_log.csv"):
     # Add fixed "class" column
@@ -121,4 +125,50 @@ def predict(features: Features):
         "results": results
     }
 
+
 #do the phishing prediction here 
+#do the retrainig cade here
+# ========== Scheduled retraining logic ==========
+RETRAIN_INTERVAL_DAYS = 30
+RETRAIN_SCRIPT_PATH = "./retrain.py"
+START_TIME = datetime.now()
+LAST_RETRAIN_FILE = "last_retrain.txt"
+
+
+def run_retrain_script():
+    """Execute the retrain.py script."""
+    print("[Retrain] Running retrain.py ...")
+    subprocess.run(["python", RETRAIN_SCRIPT_PATH], check=True)
+    with open(LAST_RETRAIN_FILE, "w") as f:
+        f.write(datetime.now().isoformat())
+    print("[Retrain] Retraining completed successfully.")
+
+
+def retrain_scheduler():
+    """Background thread to check and trigger retraining every 30 days."""
+    while True:
+        try:
+            if os.path.exists(LAST_RETRAIN_FILE):
+                with open(LAST_RETRAIN_FILE, "r") as f:
+                    last_run = datetime.fromisoformat(f.read().strip())
+            else:
+                last_run = START_TIME
+
+            if datetime.now() - last_run >= timedelta(days=RETRAIN_INTERVAL_DAYS):
+                run_retrain_script()
+
+        except Exception as e:
+            print(f"[Retrain] Error during retrain check: {e}")
+
+        time.sleep(24 * 3600)  # Check once per day
+
+
+app.get("/retrain")
+def manual_retrain():
+    run_retrain_script()
+    return {"status": "Retraining started manually"}
+
+
+# Start background retrain scheduler
+threading.Thread(target=retrain_scheduler, daemon=True).start()
+
