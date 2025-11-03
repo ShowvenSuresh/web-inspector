@@ -69,7 +69,7 @@ function extractFeatures(details) {
     method: method,
     path: path,
     body: body,
-    single_q: (body.match(/'/g) || []).length,
+    sinfailedgle_q: (body.match(/'/g) || []).length,
     double_q: (body.match(/"/g) || []).length,
     dashes: (body.match(/--/g) || []).length,
     braces: (body.match(/[{}]/g) || []).length,
@@ -244,4 +244,75 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 });
 
 // add a section to extract the featueres needed for the ohishing detection
+// ================================
+// PHISHING FEATURE EXTRACTION
+// ================================
+
+// Helper function to count occurrences of a character in a string
+function countChar(str, char) {
+  return (str.match(new RegExp(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+}
+
+// Extract static URL features
+function extractUrlFeatures(url, n_redirection = 0) {
+  return {
+    url_length: url.length,
+    n_dots: countChar(url, '.'),
+    n_hypens: countChar(url, '-'),
+    n_underline: countChar(url, '_'),
+    n_slash: countChar(url, '/'),
+    n_questionmark: countChar(url, '?'),
+    n_equal: countChar(url, '='),
+    n_at: countChar(url, '@'),
+    n_and: countChar(url, '&'),
+    n_exclamation: countChar(url, '!'),
+    n_space: countChar(url, ' '),
+    n_tilde: countChar(url, '~'),
+    n_comma: countChar(url, ','),
+    n_plus: countChar(url, '+'),
+    n_asterisk: countChar(url, '*'),
+    n_hashtag: countChar(url, '#'),
+    n_dollar: countChar(url, '$'),
+    n_percent: countChar(url, '%'),
+    n_redirection: n_redirection
+  };
+}
+
+// Store redirect counts temporarily per tab
+let redirectCounts = {};
+
+// Listen for redirection events
+chrome.webRequest.onBeforeRedirect.addListener(
+  (details) => {
+    const tabId = details.tabId;
+    if (tabId < 0) return;
+
+    if (!redirectCounts[tabId]) {
+      redirectCounts[tabId] = 0;
+    }
+    redirectCounts[tabId] += 1; // Increment redirection count for that tab
+  },
+  { urls: ["<all_urls>"] }
+);
+
+// Reset redirect counter when navigation is complete
+chrome.webNavigation.onCompleted.addListener((details) => {
+  const url = details.url;
+  const tabId = details.tabId;
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+
+  const n_redirection = redirectCounts[tabId] || 0;
+  const p_features = extractUrlFeatures(url, n_redirection);
+
+  console.log('🔍 URL Features Extracted:', { url, ...p_features });
+
+  // Optional: send to backend, popup, or storage
+  // chrome.runtime.sendMessage({ type: 'url_features', data: { url, ...p_features } });
+
+  // Clear redirection count for that tab
+  delete redirectCounts[tabId];
+}, {
+  url: [{ schemes: ['http', 'https'] }]
+});
 

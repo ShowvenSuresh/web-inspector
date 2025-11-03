@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "A chrome extension to inspect http traffic",
   "background": {
-    "service_worker": "./background/background.js"
+    "service_worker": "background/background.js"
   },
   "action": {
     "default_popup": "./pages/popup.html"
