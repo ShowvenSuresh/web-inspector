@@ -325,7 +325,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     }
 
     const result = await response.json();
-    console.log(`🧠 [Phishing] Prediction result for ${url}:`, result);
+    console.log(` [Phishing] Prediction result for ${url}:`, result);
 
     // Check if phishing detected (using ensemble prediction if available)
     const predictions = result.predictions || {};
@@ -338,14 +338,14 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     );
 
     if (isPhishing || anyModelPhishing) {
-      console.warn(`🚨 [Phishing] WARNING: Phishing site detected! ${url}`);
+      console.warn(` [Phishing] WARNING: Phishing site detected! ${url}`);
 
       // Inject phishing warning script
       chrome.scripting.executeScript({
         target: { tabId },
         files: ["/content/phishingNotification.js"]
       }).catch(err => {
-        console.error(`❌ [Phishing] Failed to inject warning script: ${err.message}`);
+        console.error(` [Phishing] Failed to inject warning script: ${err.message}`);
       });
 
       // Optional: Add to blocked domains
@@ -357,11 +357,11 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
         console.log(`[Phishing] Added to blocked domains: ${domain}`);
       });
     } else {
-      console.log(`✅ [Phishing] Site appears legitimate: ${url}`);
+      console.log(` [Phishing] Site appears legitimate: ${url}`);
     }
 
   } catch (error) {
-    console.error(`❌ [Phishing] Error processing ${url}:`, error);
+    console.error(` [Phishing] Error processing ${url}:`, error);
     // Optional: Fallback to basic checks if backend fails
     if (url.includes("bit.ly") || url.includes("tinyurl") || n_redirection > 3) {
       console.warn(`⚠️ [Phishing] Suspicious URL pattern detected (fallback): ${url}`);
