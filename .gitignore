@@ -18,3 +18,7 @@ dist/
 # --- VSCode ---
 .vscode/
 *.code-workspace
+
+
+#--models for phising
+p_models/

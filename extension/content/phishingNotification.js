@@ -67,11 +67,11 @@
 
   document.getElementById("go-alerts-phishing").onclick = () => {
     chrome.runtime.sendMessage({ type: "open-alerts" });
-    wrapper.remove();
+    wrapper?.remove();
   };
 
   document.getElementById("block-domain-phishing").onclick = () => {
     chrome.runtime.sendMessage({ type: "block-domain", domain });
-    wrapper.remove();
+    wrapper?.remove();
   };
 })();
