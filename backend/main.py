@@ -127,6 +127,9 @@ def predict(features: Features):
 
 
 #do the phishing prediction here 
+@app.post("/predictPhishing")
+def predictPhishing():
+
 #do the retrainig cade here
 # ========== Scheduled retraining logic ==========
 RETRAIN_INTERVAL_DAYS = 30
