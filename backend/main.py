@@ -1,6 +1,6 @@
 
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
@@ -53,6 +53,7 @@ class Features(BaseModel):
     path_length: int
     body_length: int
     badwords_count: int
+
 
 # Load all the preprossind model to process the features
 ord_enc = joblib.load("./models/ordinal_encoder.pkl")
@@ -126,12 +127,168 @@ def predict(features: Features):
     }
 
 
-#do the phishing prediction here 
-@app.post("/predictPhishing")
-def predictPhishing():
-    print("ffff")
+# ========== Load phishing models and preprocessing tools ==========
+PHISHING_MODEL_DIR = "./p_models"
 
-#do the retrainig cade here
+# Verify phishing model directory exists
+if not os.path.exists(PHISHING_MODEL_DIR):
+    os.makedirs(PHISHING_MODEL_DIR)
+    print(f"[Phishing] Created directory for phishing models: {PHISHING_MODEL_DIR}")
+
+phishing_model_files = {
+    "p_svm": os.path.join(PHISHING_MODEL_DIR, "svm_model.pkl"),
+    "p_random_forest": os.path.join(PHISHING_MODEL_DIR, "random_forest_model.pkl"),
+    "p_knn": os.path.join(PHISHING_MODEL_DIR, "knn_model.pkl"),
+    "p_stacked": os.path.join(PHISHING_MODEL_DIR, "stacked_model.pkl"),
+    "scaler": os.path.join(PHISHING_MODEL_DIR, "scaler.pkl"),
+    "feature_columns": os.path.join(PHISHING_MODEL_DIR, "feature_columns.pkl")
+}
+
+# Load phishing preprocessing artifacts
+try:
+    p_scaler = joblib.load(phishing_model_files["scaler"])
+    p_feature_columns = joblib.load(phishing_model_files["feature_columns"])
+    print(f"[Phishing] ✅ Loaded feature columns: {p_feature_columns}")
+    print(f"[Phishing] ✅ Expected feature count: {len(p_feature_columns)}")
+except Exception as e:
+    raise RuntimeError(f"[Phishing] ⚠️ Error loading preprocessing artifacts: {e}")
+
+# Load phishing models into separate dictionary
+phishing_models = {}
+for name in ["p_svm", "p_random_forest", "p_knn", "p_stacked"]:
+    path = phishing_model_files[name]
+    try:
+        if os.path.exists(path):
+            phishing_models[name] = joblib.load(path)
+            print(f"[Phishing] ✅ Loaded {name} model from {path}")
+        else:
+            print(f"[Phishing] ⚠️ Model file not found: {path}")
+    except Exception as e:
+        print(f"[Phishing] ⚠️ Failed to load {name} from {path}: {e}")
+
+print(f"[Phishing] ✅ Successfully loaded {len(phishing_models)} phishing models")
+
+# Phishing features model - DYNAMICALLY GENERATED FROM TRAINING COLUMNS
+class PhishingFeatures(BaseModel):
+    # This will be dynamically validated against p_feature_columns
+    features: dict
+
+@app.post("/predictPhishing")
+def predict_phishing(features: dict):
+    """
+    Predict phishing probability using multiple models.
+    Accepts a flat dictionary of features matching the training schema.
+    
+    Example request body:
+    {
+        "url_length": 45.0,
+        "n_dots": 2.0,
+        "n_hypens": 1.0,
+        ...
+    }
+    """
+    try:
+        # Validate feature presence
+        missing_features = [col for col in p_feature_columns if col not in features]
+        if missing_features:
+            error_msg = (
+                f"Missing {len(missing_features)} required features. "
+                f"Expected features: {p_feature_columns}"
+            )
+            print(f"[Phishing] ❌ Validation failed: {error_msg}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing features: {missing_features[:5]}{'...' if len(missing_features) > 5 else ''}"
+            )
+        
+        # Create DataFrame with features in EXACT training order
+        feature_dict = {col: [features[col]] for col in p_feature_columns}
+        X = pd.DataFrame(feature_dict)
+        
+        # Scale features
+        X_scaled = p_scaler.transform(X)
+        
+        # Verify dimensions match training
+        if X_scaled.shape[1] != len(p_feature_columns):
+            raise ValueError(
+                f"Feature count mismatch after scaling: "
+                f"got {X_scaled.shape[1]}, expected {len(p_feature_columns)}"
+            )
+
+        # Generate predictions for all models
+        results = {}
+        for name, model in phishing_models.items():
+            try:
+                # Get prediction
+                pred_class = int(model.predict(X_scaled)[0])
+                prediction = "phishing" if pred_class == 1 else "legitimate"
+                
+                # Get probabilities if available
+                if hasattr(model, "predict_proba"):
+                    proba = model.predict_proba(X_scaled)[0]
+                    results[name] = {
+                        "prediction": prediction,
+                        "confidence": float(max(proba)),
+                        "probabilities": {
+                            "legitimate": float(proba[0]),
+                            "phishing": float(proba[1])
+                        }
+                    }
+                else:
+                    results[name] = {
+                        "prediction": prediction,
+                        "confidence": None
+                    }
+                
+                print(f"[Phishing] {name}: {prediction} (confidence: {results[name].get('confidence', 'N/A')})")
+                
+            except Exception as e:
+                error_detail = f"Model {name} failed: {str(e)}"
+                print(f"[Phishing] ⚠️ {error_detail}")
+                results[name] = {
+                    "error": error_detail,
+                    "prediction": "error"
+                }
+
+        # Create ensemble prediction (average probabilities)
+        valid_probs = [
+            results[name]["probabilities"] 
+            for name in results 
+            if "probabilities" in results[name]
+        ]
+        
+        if valid_probs:
+            avg_legit = np.mean([p["legitimate"] for p in valid_probs])
+            avg_phishing = np.mean([p["phishing"] for p in valid_probs])
+            ensemble_pred = "phishing" if avg_phishing >= 0.5 else "legitimate"
+            
+            results["ensemble"] = {
+                "prediction": ensemble_pred,
+                "confidence": float(max(avg_legit, avg_phishing)),
+                "probabilities": {
+                    "legitimate": float(avg_legit),
+                    "phishing": float(avg_phishing)
+                },
+                "note": "Average of all probability-based models"
+            }
+
+        return {
+            "success": True,
+            "input_features": features,
+            "predictions": results,
+            "timestamp": datetime.now().isoformat(),
+            "expected_features": p_feature_columns,
+            "feature_count": len(p_feature_columns)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Prediction failed: {str(e)}"
+        print(f"[Phishing] 🔴 CRITICAL ERROR: {error_msg}")
+        print(f"Received features: {list(features.keys())}")
+        print(f"Expected features: {p_feature_columns}")
+        raise HTTPException(status_code=500, detail=error_msg)#do the retrainig cade here
 # ========== Scheduled retraining logic ==========
 RETRAIN_INTERVAL_DAYS = 30
 RETRAIN_SCRIPT_PATH = "./retrain.py"
