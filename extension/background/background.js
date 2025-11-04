@@ -273,7 +273,7 @@ function extractUrlFeatures(url, n_redirection = 0) {
     n_comma: countChar(url, ','),
     n_plus: countChar(url, '+'),
     n_asterisk: countChar(url, '*'),
-    n_hashtag: countChar(url, '#'),
+    n_hastag: countChar(url, '#'),
     n_dollar: countChar(url, '$'),
     n_percent: countChar(url, '%'),
     n_redirection: n_redirection
@@ -297,24 +297,83 @@ chrome.webRequest.onBeforeRedirect.addListener(
   { urls: ["<all_urls>"] }
 );
 
-// Reset redirect counter when navigation is complete
-chrome.webNavigation.onCompleted.addListener((details) => {
+// When navigation completes — extract, send to backend, and log prediction
+chrome.webNavigation.onCompleted.addListener(async (details) => {
   const url = details.url;
   const tabId = details.tabId;
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return;
 
   const n_redirection = redirectCounts[tabId] || 0;
   const p_features = extractUrlFeatures(url, n_redirection);
 
-  console.log('🔍 URL Features Extracted:', { url, ...p_features });
+  console.log("🔍 URL Features Extracted:", { url, ...p_features });
 
-  // Optional: send to backend, popup, or storage
-  // chrome.runtime.sendMessage({ type: 'url_features', data: { url, ...p_features } });
+  try {
+    // Send features to backend for prediction
+    const response = await fetch("http://127.0.0.1:8000/predictPhishing", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(p_features),
+      timeout: 5000 // 5 second timeout
+    });
 
-  // Clear redirection count for that tab
-  delete redirectCounts[tabId];
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log(`🧠 [Phishing] Prediction result for ${url}:`, result);
+
+    // Check if phishing detected (using ensemble prediction if available)
+    const predictions = result.predictions || {};
+    const ensemble = predictions.ensemble || {};
+    const isPhishing = ensemble.prediction === "phishing" && (ensemble.confidence || 0) > 0.7;
+
+    // Fallback to individual models if ensemble not available
+    const anyModelPhishing = Object.values(predictions).some(model =>
+      model.prediction === "phishing" && (model.confidence || 0) > 0.8
+    );
+
+    if (isPhishing || anyModelPhishing) {
+      console.warn(`🚨 [Phishing] WARNING: Phishing site detected! ${url}`);
+
+      // Inject phishing warning script
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["/content/phishingNotification.js"]
+      }).catch(err => {
+        console.error(`❌ [Phishing] Failed to inject warning script: ${err.message}`);
+      });
+
+      // Optional: Add to blocked domains
+      const domain = new URL(url).hostname;
+      chrome.storage.local.get({ blocked: [] }, (data) => {
+        const blockedDomains = new Set(data.blocked);
+        blockedDomains.add(domain);
+        chrome.storage.local.set({ blocked: Array.from(blockedDomains) });
+        console.log(`[Phishing] Added to blocked domains: ${domain}`);
+      });
+    } else {
+      console.log(`✅ [Phishing] Site appears legitimate: ${url}`);
+    }
+
+  } catch (error) {
+    console.error(`❌ [Phishing] Error processing ${url}:`, error);
+    // Optional: Fallback to basic checks if backend fails
+    if (url.includes("bit.ly") || url.includes("tinyurl") || n_redirection > 3) {
+      console.warn(`⚠️ [Phishing] Suspicious URL pattern detected (fallback): ${url}`);
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["/content/phishingNotification.js"]
+      });
+    }
+  } finally {
+    // Always clear redirection count for this tab
+    delete redirectCounts[tabId];
+  }
 }, {
-  url: [{ schemes: ['http', 'https'] }]
+  url: [{ schemes: ["http", "https"] }]
 });
-
