@@ -68,8 +68,8 @@ function extractFeatures(details) {
   const features = {
     method: method,
     path: path,
-    body: body,
-    sinfailedgle_q: (body.match(/'/g) || []).length,
+    body: body || "",
+    single_q: (body.match(/'/g) || []).length,
     double_q: (body.match(/"/g) || []).length,
     dashes: (body.match(/--/g) || []).length,
     braces: (body.match(/[{}]/g) || []).length,
@@ -100,7 +100,7 @@ async function sendToBackend(features) {
     });
 
     const result = await response.json();
-    console.log('Classification result:', result);
+    //console.log('Classification result:', result);
     const elapsed = Date.now() - start;
 
     // update avg time
@@ -143,6 +143,8 @@ chrome.webRequest.onBeforeRequest.addListener(
       // Normalize classification
       const classification =
         result?.results?.stacked?.prediction?.toLowerCase() || "unknown";
+      console.log(classification)
+      //const classification = "bad"
 
       // --- Traffic log (all requests)
       trafficLog.unshift({

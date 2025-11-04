@@ -129,6 +129,7 @@ def predict(features: Features):
 #do the phishing prediction here 
 @app.post("/predictPhishing")
 def predictPhishing():
+    print("ffff")
 
 #do the retrainig cade here
 # ========== Scheduled retraining logic ==========
