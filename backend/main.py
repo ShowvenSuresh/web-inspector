@@ -140,6 +140,7 @@ phishing_model_files = {
     "p_random_forest": os.path.join(PHISHING_MODEL_DIR, "random_forest_model.pkl"),
     "p_knn": os.path.join(PHISHING_MODEL_DIR, "knn_model.pkl"),
     "p_stacked": os.path.join(PHISHING_MODEL_DIR, "stacked_model.pkl"),
+    "p_boost":os.path.join( PHISHING_MODEL_DIR, "xgboost_model.pkl"),
     "scaler": os.path.join(PHISHING_MODEL_DIR, "scaler.pkl"),
     "feature_columns": os.path.join(PHISHING_MODEL_DIR, "feature_columns.pkl")
 }
@@ -155,7 +156,7 @@ except Exception as e:
 
 # Load phishing models into separate dictionary
 phishing_models = {}
-for name in ["p_svm", "p_random_forest", "p_knn", "p_stacked"]:
+for name in ["p_svm", "p_random_forest", "p_knn", "p_stacked","p_boost"]:
     path = phishing_model_files[name]
     try:
         if os.path.exists(path):
