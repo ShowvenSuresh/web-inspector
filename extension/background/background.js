@@ -348,14 +348,6 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
         console.error(` [Phishing] Failed to inject warning script: ${err.message}`);
       });
 
-      // Optional: Add to blocked domains
-      const domain = new URL(url).hostname;
-      chrome.storage.local.get({ blocked: [] }, (data) => {
-        const blockedDomains = new Set(data.blocked);
-        blockedDomains.add(domain);
-        chrome.storage.local.set({ blocked: Array.from(blockedDomains) });
-        console.log(`[Phishing] Added to blocked domains: ${domain}`);
-      });
     } else {
       console.log(` [Phishing] Site appears legitimate: ${url}`);
     }
