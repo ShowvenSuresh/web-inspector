@@ -291,46 +291,78 @@ def predict_phishing(features: dict):
         print(f"Expected features: {p_feature_columns}")
         raise HTTPException(status_code=500, detail=error_msg)#do the retrainig cade here
 # ========== Scheduled retraining logic ==========
+
+# ========== Configuration ==========
 RETRAIN_INTERVAL_DAYS = 30
-RETRAIN_SCRIPT_PATH = "./retrain.py"
+TRAFFIC_RETRAIN_SCRIPT = "./retrain.py"
+PHISHING_RETRAIN_SCRIPT = "./p_retrain.py"
+
+LAST_TRAFFIC_FILE = "last_retrain.txt"
+LAST_PHISHING_FILE = "last_retrain_phishing.txt"
+
 START_TIME = datetime.now()
-LAST_RETRAIN_FILE = "last_retrain.txt"
 
 
-def run_retrain_script():
-    """Execute the retrain.py script."""
-    print("[Retrain] Running retrain.py ...")
-    subprocess.run(["python", RETRAIN_SCRIPT_PATH], check=True)
-    with open(LAST_RETRAIN_FILE, "w") as f:
-        f.write(datetime.now().isoformat())
-    print("[Retrain] Retraining completed successfully.")
+# ========== Helper Function ==========
+def run_retrain_script(script_path, last_run_file, model_name):
+    """Run a retraining script and update its last-run timestamp."""
+    try:
+        print(f"[Retrain] Running {model_name} retraining script: {script_path}")
+        subprocess.run(["python", script_path], check=True)
+        with open(last_run_file, "w") as f:
+            f.write(datetime.now().isoformat())
+        print(f"[Retrain] {model_name} retraining completed successfully.")
+    except Exception as e:
+        print(f"[Retrain] Error during {model_name} retraining: {e}")
 
 
+# ========== Scheduler Logic ==========
 def retrain_scheduler():
-    """Background thread to check and trigger retraining every 30 days."""
+    """Background thread to check and trigger retraining for all models every 30 days."""
     while True:
         try:
-            if os.path.exists(LAST_RETRAIN_FILE):
-                with open(LAST_RETRAIN_FILE, "r") as f:
-                    last_run = datetime.fromisoformat(f.read().strip())
+            # --- Traffic retraining check ---
+            if os.path.exists(LAST_TRAFFIC_FILE):
+                with open(LAST_TRAFFIC_FILE, "r") as f:
+                    last_traffic_run = datetime.fromisoformat(f.read().strip())
             else:
-                last_run = START_TIME
+                last_traffic_run = START_TIME
 
-            if datetime.now() - last_run >= timedelta(days=RETRAIN_INTERVAL_DAYS):
-                run_retrain_script()
+            # --- Phishing retraining check ---
+            if os.path.exists(LAST_PHISHING_FILE):
+                with open(LAST_PHISHING_FILE, "r") as f:
+                    last_phishing_run = datetime.fromisoformat(f.read().strip())
+            else:
+                last_phishing_run = START_TIME
+
+            # --- Trigger retraining if interval exceeded ---
+            now = datetime.now()
+            if now - last_traffic_run >= timedelta(days=RETRAIN_INTERVAL_DAYS):
+                run_retrain_script(TRAFFIC_RETRAIN_SCRIPT, LAST_TRAFFIC_FILE, "Traffic")
+
+            if now - last_phishing_run >= timedelta(days=RETRAIN_INTERVAL_DAYS):
+                run_retrain_script(PHISHING_RETRAIN_SCRIPT, LAST_PHISHING_FILE, "Phishing")
 
         except Exception as e:
-            print(f"[Retrain] Error during retrain check: {e}")
+            print(f"[Retrain] Scheduler error: {e}")
 
         time.sleep(24 * 3600)  # Check once per day
 
 
-app.get("/retrain")
-def manual_retrain():
-    run_retrain_script()
-    return {"status": "Retraining started manually"}
+# ========== Manual Retrain Endpoints ==========
+@app.get("/retrain/traffic")
+def manual_retrain_traffic():
+    run_retrain_script(TRAFFIC_RETRAIN_SCRIPT, LAST_TRAFFIC_FILE, "Traffic")
+    return {"status": "Traffic retraining started manually"}
 
 
-# Start background retrain scheduler
+@app.get("/retrain/phishing")
+def manual_retrain_phishing():
+    run_retrain_script(PHISHING_RETRAIN_SCRIPT, LAST_PHISHING_FILE, "Phishing")
+    return {"status": "Phishing retraining started manually"}
+
+
+# ========== Start Background Scheduler ==========
 threading.Thread(target=retrain_scheduler, daemon=True).start()
+print("[Retrain] Background retraining scheduler started.")
 
