@@ -369,3 +369,19 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
 }, {
   url: [{ schemes: ["http", "https"] }]
 });
+
+
+//check is the site was blocked
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  const { blocked } = await chrome.storage.local.get({ blocked: [] });
+
+  for (const domain of blocked) {
+    if (details.url.includes(domain)) {
+      // Redirect to a custom local warning page
+      chrome.tabs.update(details.tabId, {
+        url: chrome.runtime.getURL("background/blocked.html")
+      });
+      break;
+    }
+  }
+}, { url: [{ urlMatches: ".*" }] });

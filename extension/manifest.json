@@ -9,6 +9,16 @@
   "action": {
     "default_popup": "./pages/popup.html"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "background/blocked.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
   "permissions": [
     "storage",
     "webNavigation",
@@ -17,7 +27,9 @@
     "history",
     "scripting",
     "webRequest",
-    "notifications"
+    "notifications",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "<all_urls>"
