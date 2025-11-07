@@ -12,7 +12,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "background/blocked.html"
+        "background/blocked.html",
+        "background/blocked.js"
       ],
       "matches": [
         "<all_urls>"
@@ -33,5 +34,8 @@
   ],
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }

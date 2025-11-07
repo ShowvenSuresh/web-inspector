@@ -378,10 +378,26 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
   for (const domain of blocked) {
     if (details.url.includes(domain)) {
       // Redirect to a custom local warning page
+      const blockedDomain = new URL(details.url).hostname;
+
       chrome.tabs.update(details.tabId, {
-        url: chrome.runtime.getURL("background/blocked.html")
+        url: chrome.runtime.getURL(`background/blocked.html?domain=${blockedDomain}`)
       });
       break;
     }
   }
 }, { url: [{ urlMatches: ".*" }] });
+//unblock the site
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === "unblockDomain" && msg.domain) {
+    chrome.storage.local.get({ blocked: [] }, (data) => {
+      const updated = data.blocked.filter((d) => d !== msg.domain);
+      chrome.storage.local.set({ blocked: updated }, () => {
+        console.log(`✅ Unblocked: ${msg.domain}`);
+        sendResponse({ success: true });
+      });
+    });
+    return true; // required for async sendResponse
+  }
+});
+

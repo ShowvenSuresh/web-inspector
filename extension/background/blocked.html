@@ -61,20 +61,36 @@
       opacity: 0.85;
     }
 
-    .button {
-      display: inline-block;
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
       margin-top: 2rem;
-      padding: 0.75rem 1.5rem;
-      background-color: var(--accent-color);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 0.5rem;
-      transition: background 0.3s;
-      font-weight: 500;
-      cursor: pointer;
     }
 
-    .button:hover {
+    .button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #goBackBtn {
+      background-color: #6b7280;
+    }
+
+    #goBackBtn:hover {
+      background-color: #4b5563;
+    }
+
+    #unblockBtn {
+      background-color: var(--accent-color);
+    }
+
+    #unblockBtn:hover {
       background-color: #dc2626;
     }
   </style>
@@ -85,36 +101,14 @@
     <span class="emoji">🚫</span>
     <h1>Site Blocked</h1>
     <p id="message">This website has been blocked by your browser extension.</p>
-    <button class="button" id="goBackBtn">Go Back</button>
+    <div class="buttons">
+      <button class="button" id="goBackBtn">Go Back</button>
+      <button class="button" id="unblockBtn">Unblock & Reload</button>
+    </div>
   </div>
 
 
-  <script>
-    // Get domain from query parameter
-    const params = new URLSearchParams(window.location.search);
-    const domain = params.get("domain");
-
-    if (domain) {
-      document.getElementById("message").textContent =
-        `${domain} has been blocked by your browser extension.`;
-    }
-
-    // Go Back / Close Tab button
-    document.getElementById("goBackBtn").addEventListener("click", () => {
-      // Try to close the current tab using Chrome API
-      if (chrome && chrome.tabs) {
-        chrome.tabs.getCurrent((tab) => {
-          if (tab && tab.id) {
-            chrome.tabs.remove(tab.id);
-          } else {
-            window.close(); // fallback
-          }
-        });
-      } else {
-        window.close(); // fallback for non-extension context
-      }
-    });
-  </script>
+  <script src="blocked.js"></script>
 </body>
 
 </html>
