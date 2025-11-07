@@ -338,6 +338,16 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     );
 
     if (isPhishing || anyModelPhishing) {
+
+      // Also add a phishing entry to traffic log for clarity
+      trafficLog.unshift({
+        time: new Date().toLocaleTimeString(),
+        url,
+        method: 'GET',
+        classification: 'phishing'
+      });
+      if (trafficLog.length > MAX_LOGS) trafficLog.pop();
+
       console.warn(` [Phishing] WARNING: Phishing site detected! ${url}`);
 
       // Inject phishing warning script
@@ -348,20 +358,53 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
         console.error(` [Phishing] Failed to inject warning script: ${err.message}`);
       });
 
+      // === Log phishing alert to recentAlerts and alertsLog ===
+      try {
+        const urlObj2 = new URL(url);
+        const phishAlert = {
+          id: Date.now(),
+          domain: urlObj2.hostname,
+          classification: 'phishing',
+          method: 'GET',
+          path: urlObj2.pathname,
+          features: p_features
+        };
+
+        alertsLog.unshift(phishAlert);
+        if (alertsLog.length > MAX_ALERTS) alertsLog.pop();
+
+        recentAlerts.unshift({
+          time: new Date().toLocaleTimeString(),
+          url,
+          method: 'GET',
+          classification: 'phishing',
+        });
+        if (recentAlerts.length > MAX_ALERTS) recentAlerts.pop();
+
+        stats.alerts++;
+
+        chrome.storage.local.set({ stats, trafficLog, alertsLog, recentAlerts }, () => {
+          console.log("[Phishing] Alert logged. Alerts:", alertsLog.length);
+        });
+
+        chrome.runtime.sendMessage({
+          type: 'statsUpdate',
+          stats,
+          trafficLog,
+          alertsLog,
+          recentAlerts
+        }).catch(() => { });
+      } catch (e) {
+        console.warn('[Phishing] Failed to log phishing alert:', e);
+      }
+
+
     } else {
       console.log(` [Phishing] Site appears legitimate: ${url}`);
     }
 
   } catch (error) {
     console.error(` [Phishing] Error processing ${url}:`, error);
-    // Optional: Fallback to basic checks if backend fails
-    if (url.includes("bit.ly") || url.includes("tinyurl") || n_redirection > 3) {
-      console.warn(`⚠️ [Phishing] Suspicious URL pattern detected (fallback): ${url}`);
-      chrome.scripting.executeScript({
-        target: { tabId },
-        files: ["/content/phishingNotification.js"]
-      });
-    }
   } finally {
     // Always clear redirection count for this tab
     delete redirectCounts[tabId];

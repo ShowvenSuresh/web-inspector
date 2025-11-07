@@ -78,17 +78,19 @@ document.addEventListener("DOMContentLoaded", () => {
     requestsCount.textContent = stats.requests ?? 0;
     blockedCount.textContent = stats.blocked ?? 0;
     alertsCount.textContent = stats.alerts ?? 0;
+
     avgTime.textContent = `${stats.avgTime ?? 0} ms`;
     let classificationLabel = "malicious"
 
     recentAlertsList.innerHTML = "";
-    (recentAlerts || []).forEach((alert) => {
+    (recentAlerts || []).forEach((alert, idx) => {
       const div = document.createElement("div");
       div.className = "recent-alert";
+      const cls = alert.classification?.toLowerCase() || 'unknown';
+      let label = cls === 'phishing' ? 'phishing' : (['bad', 'malicious'].includes(cls) ? 'malicious' : cls);
+      let colorClass = cls;
       div.innerHTML = `
-        <span class="alert-class ${alert.classification?.toLowerCase()}">
-          ${classificationLabel}
-        </span>
+        <span class="alert-class ${colorClass}" style="min-width:65px;text-align:center;">${label}</span>
         <span class="alert-url">${alert.url}</span>
         <span class="alert-time">${alert.time}</span>
       `;
@@ -181,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (alert.classification === "benign") {
       return "This request was analyzed and found safe.";
     }
-    return "No clear classification available.";
+    return "this website is suspected for phishing ";
   }
 
   function renderAlerts(alertsLog) {
@@ -199,12 +201,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const badgeClass =
         alert.classification === "bad" || alert.classification === "malicious"
           ? "status-badge status-malicious"
-          : "status-badge status-benign";
+          : "status-badge status-malicious";
 
       card.innerHTML = `
         <div class="alert-header">
           <span class="alert-title">🌐 ${alert.domain || "Unknown Domain"}</span>
           <span class="${badgeClass}">${"malicious" || "unknown"}</span>
+
         </div>
         <div class="alert-actions">
           <button class="block-btn">🚫 Block</button>
@@ -296,4 +299,122 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBox.addEventListener("input", (e) => {
     loadHistory(e.target.value, 50);
   });
+
+  // Colorize recent alert badges clearly (red for malicious, orange for phishing)
+  const styleRecent = document.createElement('style');
+  styleRecent.textContent = `
+    .recent-alert .alert-class.malicious, .recent-alert .alert-class.bad { background:#ff2d2d; color:#fff; }
+    .recent-alert .alert-class.phishing { background:#ff8c00; color:#fff; }
+    .recent-alert .alert-class.safe, .recent-alert .alert-class.good, .recent-alert .alert-class.benign { background:#22c55e; color:#fff; }
+    .recent-alert .alert-class.unknown { background:#9e9e9e; color:#fff; }
+  `;
+  document.head.appendChild(styleRecent);
+
+
+  // === Extra section: enhance UI for phishing entries without modifying existing renderers ===
+  // Adds phishing labels in Recent Alerts and specialized description/badge for phishing cards in Alerts
+  // This section only reads from storage/messages and updates the DOM post-render.
+
+  document.addEventListener("DOMContentLoaded", () => {
+    function patchRecentAlertsUI(recentAlerts) {
+      const list = document.getElementById("recentAlertsList");
+      if (!list) return;
+      const items = Array.from(list.children);
+      items.forEach((node, i) => {
+        const data = recentAlerts?.[i];
+        const badge = node.querySelector(".alert-class");
+        if (!badge || !data) return;
+        const cls = (data.classification || "").toLowerCase();
+        if (cls === "phishing") {
+          badge.textContent = "phishing";
+          badge.classList.add("phishing");
+        }
+      });
+    }
+
+    function patchAlertsUI(alertsLog) {
+      const list = document.getElementById("alertsList");
+      if (!list) return;
+      const cards = Array.from(list.children);
+      cards.forEach((card, i) => {
+        const data = alertsLog?.[i];
+        if (!data) return;
+        const classification = (data.classification || "unknown").toLowerCase();
+
+        // Numbering
+        const header = card.querySelector('.alert-header');
+        if (header && !header.querySelector('.alert-index')) {
+          const idxSpan = document.createElement('span');
+          idxSpan.className = 'alert-index';
+          idxSpan.style.marginRight = '8px';
+          idxSpan.style.fontWeight = '600';
+          idxSpan.textContent = `#${i + 1}`;
+          header.prepend(idxSpan);
+        }
+
+        // Badge normalization
+        const badge = card.querySelector('.status-badge');
+        if (badge) {
+          badge.textContent = classification;
+          // Reset inline styles (avoid accumulation)
+          badge.style.backgroundColor = '';
+          badge.style.color = '';
+          badge.style.borderColor = '';
+
+          if (["bad", "malicious"].includes(classification)) {
+            // Red badge for malicious
+            badge.style.backgroundColor = '#ff2d2d';
+            badge.style.color = '#ffffff';
+            badge.style.border = '1px solid #b30000';
+          } else if (classification === 'phishing') {
+            badge.style.backgroundColor = '#ff8c00';
+            badge.style.color = '#fff';
+            badge.style.border = '1px solid #c75f00';
+          } else if (["good", "benign", "safe"].includes(classification)) {
+            badge.style.backgroundColor = '#22c55e';
+            badge.style.color = '#fff';
+            badge.style.border = '1px solid #15803d';
+          } else {
+            badge.style.backgroundColor = '#9e9e9e';
+            badge.style.color = '#fff';
+            badge.style.border = '1px solid #616161';
+          }
+        }
+
+        // Extra description additions per type (only if not already added)
+        const details = card.querySelector('.alert-details');
+        if (details && !details.querySelector('.auto-type')) {
+          const typePara = document.createElement('p');
+          typePara.className = 'auto-type';
+          if (classification === 'phishing') {
+            typePara.innerHTML = '<b>Type:</b> Phishing - This site is likely attempting to deceive users.';
+          } else if (["bad", "malicious"].includes(classification)) {
+            typePara.innerHTML = '<b>Type:</b> Malicious Request - Potentially harmful patterns detected.';
+          } else if (["good", "benign", "safe"].includes(classification)) {
+            typePara.innerHTML = '<b>Type:</b> Benign - No harmful indicators found.';
+          } else {
+            typePara.innerHTML = '<b>Type:</b> Unknown - Insufficient indicators.';
+          }
+          details.appendChild(typePara);
+        }
+      });
+    }
+
+    // Initial patch (after existing initial renders run)
+    setTimeout(() => {
+      chrome.storage.local.get(["recentAlerts", "alertsLog"], (data) => {
+        patchRecentAlertsUI(data.recentAlerts || []);
+        patchAlertsUI(data.alertsLog || []);
+      });
+    }, 0);
+
+    // Patch on live updates
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.type === "statsUpdate") {
+        patchRecentAlertsUI(msg.recentAlerts || []);
+        patchAlertsUI(msg.alertsLog || []);
+      }
+    });
+  });
+
 });
