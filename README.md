@@ -7,18 +7,53 @@ The goal is to help visualize live web traffic, surface risky requests, and expe
 
 ## Project structure
 
-- backend/ – FastAPI service and ML artifacts
-  - main.py – API server exposing /predict
-  - retrain.py – end-to-end training pipeline (GridSearch + Stacking)
-  - models/ – saved models and preprocessing artifacts (.pkl)
-  - requirements.txt – backend dependencies
-  - Data/ – datasets (e.g., combined_dataset.csv)
-- extension/ – Chrome (Manifest v3) extension
-  - background/background.js – intercepts requests, extracts features, calls backend
-  - content/*.js – in-page warning/notification scripts
-  - pages/popup.html, popup.js, styles.css – popup UI (Dashboard, Traffic, Alerts, History)
-  - manifest.json – extension config
-- docs/ – documentation placeholder
+```
+web-inspector/
+├─ backend/
+│  ├─ Data/
+│  │  ├─ combined_dataset.csv
+│  │  ├─ web-page-phishing (1).csv
+│  │  └─ web-page-phishing_cleaned.csv
+│  ├─ models/
+│  │  ├─ feature_columns.pkl
+│  │  ├─ knn_model.pkl
+│  │  ├─ label_map.pkl
+│  │  ├─ ordinal_encoder.pkl
+│  │  ├─ random_forest_model.pkl
+│  │  ├─ scaler.pkl
+│  │  ├─ stacked_model.pkl
+│  │  └─ svm_model.pkl
+│  ├─ main.py
+│  ├─ retrain.py
+│  ├─ p_retrain.py
+│  ├─ requirements.txt
+│  ├─ good_log.csv
+│  ├─ last_retrain.txt
+│  ├─ last_retrain_phishing.txt
+│  ├─ test.py
+│  ├─ p_models/
+│  └─ venv/
+├─ extension/
+│  ├─ background/
+│  │  ├─ background.js
+│  │  ├─ blocked.html
+│  │  └─ blocked.js
+│  ├─ content/
+│  │  ├─ httpNotification.js
+│  │  ├─ phishingNotification.js
+│  │  └─ trafficNotification.js
+│  ├─ pages/
+│  │  ├─ popup.html
+│  │  ├─ popup.js
+│  │  └─ styles.css
+│  ├─ manifest.json
+│  ├─ pTest.html
+│  └─ test.html
+├─ docs/
+│  └─ Web Traffic Classfier Model Architecture.jpeg
+└─ README.md
+```
+
 
 ## How it works
 
