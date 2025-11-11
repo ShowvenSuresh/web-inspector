@@ -330,12 +330,12 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
     // Check if phishing detected (using ensemble prediction if available)
     const predictions = result.predictions || {};
     const ensemble = predictions.ensemble || {};
-    const isPhishing = ensemble.prediction === "phishing" && (ensemble.confidence || 0) > 0.7;
+    const isPhishing = ensemble.prediction === "phishing" && (ensemble.confidence || 0) > 0.96;
 
     // Fallback to individual models if ensemble not available
-    const anyModelPhishing = Object.values(predictions).some(model =>
-      model.prediction === "phishing" && (model.confidence || 0) > 0.8
-    );
+    // const anyModelPhishing = Object.values(predictions).some(model =>
+    // model.prediction === "phishing" && (model.confidence || 0) > 0.97
+    //);
 
     if (isPhishing || anyModelPhishing) {
 
@@ -343,7 +343,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       trafficLog.unshift({
         time: new Date().toLocaleTimeString(),
         url,
-        method: 'GET',
+        method: '-',
         classification: 'phishing'
       });
       if (trafficLog.length > MAX_LOGS) trafficLog.pop();
@@ -365,7 +365,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
           id: Date.now(),
           domain: urlObj2.hostname,
           classification: 'phishing',
-          method: 'GET',
+          method: '-',
           path: urlObj2.pathname,
           features: p_features
         };
@@ -376,7 +376,7 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
         recentAlerts.unshift({
           time: new Date().toLocaleTimeString(),
           url,
-          method: 'GET',
+          method: '-',
           classification: 'phishing',
         });
         if (recentAlerts.length > MAX_ALERTS) recentAlerts.pop();
