@@ -315,24 +315,23 @@ def run_retrain_script(script_path, last_run_file, model_name):
     except Exception as e:
         print(f"[Retrain] Error during {model_name} retraining: {e}")
 
-
 # ========== Scheduler Logic ==========
 def retrain_scheduler():
     """Background thread to check and trigger retraining for all models every 30 days."""
     while True:
         try:
             # --- Traffic retraining check ---
-            if os.path.exists(LAST_TRAFFIC_FILE):
+            try:
                 with open(LAST_TRAFFIC_FILE, "r") as f:
                     last_traffic_run = datetime.fromisoformat(f.read().strip())
-            else:
+            except Exception:
                 last_traffic_run = START_TIME
 
             # --- Phishing retraining check ---
-            if os.path.exists(LAST_PHISHING_FILE):
+            try:
                 with open(LAST_PHISHING_FILE, "r") as f:
                     last_phishing_run = datetime.fromisoformat(f.read().strip())
-            else:
+            except Exception:
                 last_phishing_run = START_TIME
 
             # --- Trigger retraining if interval exceeded ---
@@ -348,21 +347,19 @@ def retrain_scheduler():
 
         time.sleep(24 * 3600)  # Check once per day
 
-
 # ========== Manual Retrain Endpoints ==========
 @app.get("/retrain/traffic")
 def manual_retrain_traffic():
     run_retrain_script(TRAFFIC_RETRAIN_SCRIPT, LAST_TRAFFIC_FILE, "Traffic")
     return {"status": "Traffic retraining started manually"}
 
-
 @app.get("/retrain/phishing")
 def manual_retrain_phishing():
     run_retrain_script(PHISHING_RETRAIN_SCRIPT, LAST_PHISHING_FILE, "Phishing")
     return {"status": "Phishing retraining started manually"}
 
-
 # ========== Start Background Scheduler ==========
-threading.Thread(target=retrain_scheduler, daemon=True).start()
-print("[Retrain] Background retraining scheduler started.")
-
+@app.on_event("startup")
+def start_scheduler():
+    threading.Thread(target=retrain_scheduler, daemon=True).start()
+    print("[Retrain] Background retraining scheduler started.")
